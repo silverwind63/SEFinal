@@ -131,8 +131,11 @@ def test_all_problems_reported_at_once():
 
 
 def test_question_text_not_kept():
-    parsed = run(FakeSheetsGateway().add_fixture("sample_a"))
-    assert "敘述" not in repr(parsed)
+    fake = FakeSheetsGateway()
+    grid = fake.add_fixture("sample_a")
+    texts = fake.question_texts(grid.spreadsheet_id)
+    assert len(texts) == 6
+    assert not any(t in repr(run(grid)) for t in texts)
 
 
 def test_structure_hash_changes_when_blank_moves():

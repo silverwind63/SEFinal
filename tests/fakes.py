@@ -26,6 +26,11 @@ class FakeSheetsGateway:
     def add_fixture(self, name: str) -> SpreadsheetGrid:
         return self.add(grid_from_response(json.loads((FIXTURES / f"{name}.json").read_text(encoding="utf-8"))))
 
+    def question_texts(self, spreadsheet_id: str, column: str = "C", header_row: int = 4) -> list[str]:
+        """快照中「題目」欄的文字，用來確認系統沒有保存或回傳題目敘述（FR-007）。"""
+        sheet = self.sheets[spreadsheet_id].sheets[0]
+        return [v for k, v in sheet.values.items() if k.startswith(column) and k[len(column):].isdigit() and int(k[len(column):]) > header_row]
+
     def set_cell(self, spreadsheet_id: str, sheet_title: str, cell: str, text: str | None) -> None:
         grid = self.sheets[spreadsheet_id]
         sheets = []

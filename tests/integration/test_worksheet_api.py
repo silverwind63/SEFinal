@@ -13,11 +13,13 @@ def test_import_preview_without_question_text(client, auth, sheets):
     res = import_b(client, auth, sheets)
     assert res.status_code == 201
     body = res.json()
-    assert body["status"] == "pending" and body["spreadsheet_title"] == "範例 B"
+    assert body["status"] == "pending" and body["spreadsheet_title"] == sheets.sheets[SAMPLE_B].title
     assert (body["question_count"], body["group_count"]) == (6, 2)
     assert body["questions"][0] == {"question_no": 1, "sheet": "學習單", "cell": "H5", "source_label": "1", "sub_label": "（1）", "group_no": 1}
     assert body["groups"][1] == {"group_no": 2, "source_label": "2", "question_nos": [3, 4]}
-    assert "敘述" not in res.text
+    texts = sheets.question_texts(SAMPLE_B)
+    assert len(texts) == 6
+    assert not any(t in res.text for t in texts)
 
 
 def test_confirm_and_state_rules(client, auth, sheets):
