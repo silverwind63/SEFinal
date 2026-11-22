@@ -30,7 +30,7 @@ def verify_unchanged(parsed: ParsedWorksheet, current: SpreadsheetGrid, labels: 
     try:
         now = parse(cleared, labels, max_questions)
     except ImportFailed as e:
-        raise StructureChanged(e.issues[0].message.rstrip("。")) from None
+        raise StructureChanged("目前的學習單" + e.issues[0].message.rstrip("。")) from None
     if now.question_count != parsed.question_count:
         raise StructureChanged(f"題數由 {parsed.question_count} 題變成 {now.question_count} 題")
     for old, new in zip(parsed.questions, now.questions):

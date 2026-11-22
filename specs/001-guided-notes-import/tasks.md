@@ -144,7 +144,7 @@ description: "Task list for 001 學習單匯入、答案寫回與結果匯出"
 - [X] T049 [P] 撰寫 tests/integration/test_no_secrets.py：完成匯入、寫回、匯出的完整流程後，確認 caplog 中不含測試密碼、Token、金鑰檔內容與答案字串；並掃描 src/ 與 tests/fixtures/ 中不含寫死的絕對路徑、密碼字面值與 private_key 字樣
 - [X] T050 [P] 在 tests/unit/test_parser.py 新增效能測試：100 題與 500 題的動態產生學習單，解析時間 < 10 秒（SC-002 中屬於本機的部分）
 - [X] T051 對照實作更新 diagrams/001-guided-notes-import/ 的 .puml 並重新產生 PNG，確認 6 張圖與最終程式碼一致（Constitution 原則 VII 實作階段驗證、品質關卡第 4 項）
-- [ ] T052 執行 `uv run pytest -v` 與 quickstart.md 的 V1–V8 人工驗證，並將測試指令、通過與失敗數、失敗輸出，以及人工驗證結果回報給使用者（Constitution 原則 VI）
+- [X] T052 執行 `uv run pytest -v` 與 quickstart.md 的 V1–V8 人工驗證，並將測試指令、通過與失敗數、失敗輸出，以及人工驗證結果回報給使用者（Constitution 原則 VI）；結果記錄於 specs/001-guided-notes-import/verification.md
 
 ---
 

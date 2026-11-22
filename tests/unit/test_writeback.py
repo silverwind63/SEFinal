@@ -65,5 +65,18 @@ def test_verify_detects_question_count_change():
 def test_verify_detects_broken_sheet():
     parsed = parse(f.grid(f.standard_sheet(2)), LABELS, 500)
     broken = f.grid(f.sheet({"A1": "沒有表頭了"}))
-    with pytest.raises(StructureChanged):
+    with pytest.raises(StructureChanged) as exc:
         verify_unchanged(parsed, broken, LABELS, 500)
+    assert "插入或刪除" in exc.value.message and "找不到表頭列" in exc.value.message
+
+
+def test_inserted_row_message_names_likely_cause():
+    """人工驗證 V5-6：插入一列後，已寫回的答案移到別列，重新解析會說「第 N 列沒有填空格」；訊息要先講結構改變的可能原因。"""
+    fake, grid, parsed = sample_b()
+    fake.set_cell(grid.spreadsheet_id, "學習單", "G11", "0")  # 模擬已寫回的答案
+    moved = f.grid(f.standard_sheet(4, prefilled={3: "0"}), spreadsheet_id=grid.spreadsheet_id)
+    with pytest.raises(StructureChanged) as exc:
+        verify_unchanged(parsed, moved, LABELS, 500)
+    message = exc.value.message
+    assert message.startswith("學習單的結構和匯入時不同（例如插入或刪除了列）")
+    assert message.endswith("請重新匯入學習單後再寫回。")
