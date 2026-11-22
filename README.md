@@ -74,6 +74,9 @@ uv run python -m guided_buzz
 uv run pytest -v
 ```
 
+每次開 pull request 或推送到 `main` 時，GitHub Actions（[`.github/workflows/ci.yml`](.github/workflows/ci.yml)）會自動執行同一個指令；
+CI 通過後才 merge 進 `main`。
+
 自動化測試一律使用 `FakeSheetsGateway` 取代 Google 服務，不連網。`tests/fixtures/sheets/` 的兩份範例快照目前是依規格
 **手動建構**；取得 service account 後，請用 `scripts/capture_sheet_fixture.py` 抓取真實範例覆蓋（見該目錄的 README）。
 需要實際連線 Google 的流程，請照 [quickstart](specs/001-guided-notes-import/quickstart.md) 的 V1–V7 人工驗證。
