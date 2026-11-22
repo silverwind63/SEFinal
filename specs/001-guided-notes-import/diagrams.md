@@ -1,5 +1,7 @@
 # Diagrams: 學習單匯入、答案寫回與結果匯出
 
+> 已審閱：2026-11-22（AI 依 spec、data-model、contracts 比對，PNG 已產生；組員人工審閱後請在此補記）
+
 **Feature**: [spec.md](./spec.md) | **Data model**: [data-model.md](./data-model.md) | **API**: [contracts/http-api.md](./contracts/http-api.md)
 
 依 Constitution 原則 VII，圖表以 PlantUML 撰寫，原始檔與 PNG 存放在

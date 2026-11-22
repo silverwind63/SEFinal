@@ -32,7 +32,16 @@
 | 401 | `INVALID_CREDENTIALS`：「密碼錯誤」 |
 | 422 | `VALIDATION_ERROR`：欄位缺漏或長度不符 |
 
-連續多次密碼錯誤時暫時限制登入，次數與時間可設定。密碼不寫入 log。
+連續多次密碼錯誤時暫時限制登入，次數與時間可設定（429 `LOGIN_LOCKED`，訊息含剩餘秒數）。密碼不寫入 log。
+
+## GET /api/auth/session
+
+| 項目 | 內容 |
+|------|------|
+| 200 | `{"owner": "teacher"}`，Token 有效 |
+| 401 | `UNAUTHORIZED`：沒有 Token、Token 無效或已過期 |
+
+前端在重新整理頁面時用來確認 sessionStorage 中的 Token 是否仍有效。
 
 ## POST /api/worksheets（匯入並預覽）
 
