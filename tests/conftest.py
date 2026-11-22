@@ -10,14 +10,14 @@ PASSWORD = "test-password-123"
 
 @pytest.fixture
 def settings(tmp_path):
-    key = tmp_path / "fake-key.json"
-    key.write_text("{}", encoding="utf-8")
+    client_file = tmp_path / "oauth-client.json"
+    client_file.write_text("{}", encoding="utf-8")
     results = tmp_path / "results"
     results.mkdir()
     return load_settings(
         {
             "GB_TEACHER_PASSWORD": PASSWORD,
-            "GB_GOOGLE_CREDENTIALS_FILE": str(key),
+            "GB_GOOGLE_OAUTH_CLIENT_FILE": str(client_file),
             "GB_DATA_DIR": str(tmp_path / "data"),
             "GB_RESULTS_DIR": str(results),
             "GB_LOGIN_MAX_FAILURES": "3",

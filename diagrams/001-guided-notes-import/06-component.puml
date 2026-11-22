@@ -8,11 +8,11 @@ package "guided_buzz" {
   component "auth\n老師登入・Token" as auth
   component "worksheet.parser\n純函式：SpreadsheetGrid → ParsedWorksheet" as parser
   component "worksheet.writeback\n純函式：挑出要寫入的空白填空格、檢查結構是否改變" as writeback
-  component "sheets\nurl・GoogleSheetsGateway" as sheets
+  component "sheets\nurl・google_auth（OAuth 登入）・GoogleSheetsGateway" as sheets
   component "export.csv_export" as export
   component "results\nJsonFileResultsProvider・mapping" as results
   component "storage\nSQLite" as storage
-  component "config\n環境變數（含 Google 憑證路徑）" as config
+  component "config\n環境變數（含 OAuth 設定檔與 token 路徑）" as config
   component "domain\n共用資料結構・介面" as domain
 }
 component "002 搶答活動" as buzz

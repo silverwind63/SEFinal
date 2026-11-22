@@ -17,7 +17,7 @@
 
 **Language/Version**: Python 3.12（以 `uv` 與 `.python-version` 固定版本，見 research R1）
 
-**Primary Dependencies**: FastAPI、uvicorn、pydantic v2、google-api-python-client 與 google-auth（Sheets API）、python-dotenv
+**Primary Dependencies**: FastAPI、uvicorn、pydantic v2、google-api-python-client、google-auth 與 google-auth-oauthlib（Sheets API、OAuth 登入）、python-dotenv
 
 **Storage**: SQLite（標準庫 `sqlite3`）存放中繼資料（試算表 ID、填空格位置、結構指紋），資料庫放在 `GB_DATA_DIR`；
 不保存任何試算表檔案（research R6）
@@ -32,7 +32,7 @@ Sheets API 回應快照（JSON），以及測試時動態產生的表格資料�
 **Performance Goals**: 100 題以內的學習單，從送出網址到看到預覽不超過 10 秒（SC-002，主要時間為一次 Sheets API 呼叫）
 
 **Constraints**: 寫回只寫入原本空白的填空格，非填空格內容 0 處被改動（SC-003、FR-026）；唯一的外部服務是
-Google Sheets（Constitution 2.0.0）；不寫死路徑或常數；機敏資料（含 Google 憑證路徑）只放環境變數
+Google Sheets（Constitution 2.0.0）；不寫死路徑或常數；機敏資料（OAuth client 設定檔與 token 檔的路徑）只放環境變數
 
 **Scale/Scope**: 1 位老師；每份學習單 ≤ 500 題（可設定）；約 3 個老師頁面（登入、匯入與確認、寫回與匯出）
 
@@ -42,9 +42,9 @@ Google Sheets（Constitution 2.0.0）；不寫死路徑或常數；機敏資料�
 
 | 原則 | 檢查結果 | 依據 |
 |------|---------|------|
-| I. 不寫死資料與設定 | ✅ | 表頭標籤、上限、資料目錄、連接埠、Token 期限、Google 憑證路徑與逾時都從 `GB_*` 環境變數讀取（R10）；解析不依賴儲存格位置（R3）；測試使用 2 份範例快照加上動態產生的變體 |
-| II. 輸入驗證與清楚錯誤 | ✅ | 定義 11 種錯誤代碼（含無效網址、無權限、找不到、無法連線），全部附上繁體中文訊息與位置（data-model）；一次收集所有問題；統一錯誤格式，不含堆疊追蹤或 Google 回應原文（contracts） |
-| III. 機敏資料只放環境變數 | ✅ | 老師密碼只來自 `GB_TEACHER_PASSWORD`、service account 金鑰路徑只來自 `GB_GOOGLE_CREDENTIALS_FILE`，未設定或檔案不存在時拒絕啟動；`.env` 與金鑰檔列入 `.gitignore`；只提供含佔位值的 `.env.example`；log 不記密碼、Token、憑證、答案（R12、R13） |
+| I. 不寫死資料與設定 | ✅ | 表頭標籤、上限、資料目錄、連接埠、Token 期限、Google OAuth 設定檔與 token 檔路徑、逾時都從 `GB_*` 環境變數讀取（R10）；解析不依賴儲存格位置（R3）；測試使用 2 份範例快照加上動態產生的變體 |
+| II. 輸入驗證與清楚錯誤 | ✅ | 定義 12 種錯誤代碼（含無效網址、無權限、找不到、無法連線、授權過期），全部附上繁體中文訊息與位置（data-model）；一次收集所有問題；統一錯誤格式，不含堆疊追蹤或 Google 回應原文（contracts） |
+| III. 機敏資料只放環境變數 | ✅ | 老師密碼只來自 `GB_TEACHER_PASSWORD`；OAuth client 設定檔與 token 檔的位置只來自 `GB_GOOGLE_OAUTH_CLIENT_FILE`、`GB_GOOGLE_TOKEN_FILE`，兩者都在 repo 之外或已列入 `.gitignore`，token 檔權限 600；缺少設定檔或尚未登入時拒絕啟動；只提供含佔位值的 `.env.example`；log 不記密碼、Token、憑證、答案（R12、R13） |
 | IV. 伺服器權威與權限隔離 | ✅ | 所有端點都由伺服器驗證 Token；非擁有者回應 404；寫回只用伺服器保存的判定結果（FR-018）；每個視窗以 sessionStorage 保存獨立身分（R9） |
 | V. 模組化與單一定義 | ✅ | 共用結構只放在 `domain/models.py`；parser、writeback、export 是純函式模組；與 002 透過 `ActivityResultsProvider` 介面串接（diagrams 第 6 節） |
 | VI. 測試與驗證回報 | ✅ | 每個使用者情境都有正常與邊界案例（quickstart）；`uv run pytest` 一個指令即可執行；quickstart 附有人工驗證步驟 V1–V7 |
@@ -79,7 +79,7 @@ specs/001-guided-notes-import/
 pyproject.toml               # 相依套件、pytest 設定
 .python-version              # 3.12
 .env.example                 # 只含佔位值
-.gitignore                   # .env、service account 金鑰檔、var/、.venv/ 等
+.gitignore                   # .env、OAuth client 設定檔與 token 檔、var/、.venv/ 等
 diagrams/001-guided-notes-import/  # PlantUML 原始檔與 PNG（specify 階段產出）
 
 src/guided_buzz/
@@ -94,6 +94,7 @@ src/guided_buzz/
 │   └── writeback.py         # 成功答案＋目前內容 → 要寫入的 {CellRef: 答案}、未填、跳過（純函式）
 ├── sheets/
 │   ├── url.py               # 驗證網址並取出試算表 ID（純函式）
+│   ├── google_auth.py       # OAuth 登入（login-google 指令）、token 檔讀寫
 │   └── google_gateway.py    # GoogleSheetsGateway：Sheets API 回應 ↔ SpreadsheetGrid、寫入儲存格
 ├── export/
 │   └── csv_export.py        # ActivityResult + ParsedWorksheet → CSV（純函式）

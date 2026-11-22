@@ -22,10 +22,13 @@ GW -> GAPI : spreadsheets.get（儲存格值＋合併範圍）
 alt 沒有存取權限
   GAPI --> GW : 403
   GW --> API : SHEET_FORBIDDEN
-  API --> T : 403 請把試算表共用給系統帳號 <service account email>
+  API --> T : 403 目前登入的帳號 <email> 沒有編輯權限
 else 試算表不存在
   GAPI --> GW : 404
   API --> T : 404 SHEET_NOT_FOUND
+else 授權過期或被撤銷
+  GAPI --> GW : RefreshError
+  API --> T : 503 GOOGLE_AUTH_EXPIRED（請重新執行 login-google）
 else 無法連線或逾時
   API --> T : 503 SHEETS_UNAVAILABLE（可稍後重試）
 else 讀取成功

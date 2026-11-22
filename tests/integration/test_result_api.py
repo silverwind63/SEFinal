@@ -75,7 +75,7 @@ def test_structure_changed_blocks_writes(client, auth, sheets, settings):
 def test_write_errors(client, auth, sheets, settings):
     wid = confirmed_b(client, auth, sheets)
     write_result(settings, wid)
-    sheets.write_errors[SAMPLE_B] = SheetForbidden(sheets.service_account_email)
+    sheets.write_errors[SAMPLE_B] = SheetForbidden(sheets.account_email)
     assert writeback(client, auth, wid).status_code == 403
     sheets.write_errors[SAMPLE_B] = SheetsUnavailable()
     assert writeback(client, auth, wid).status_code == 503

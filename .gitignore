@@ -2,6 +2,9 @@
 .env
 .secrets/
 *service-account*.json
+*oauth-client*.json
+client_secret*.json
+google-token*.json
 
 # Python
 .venv/

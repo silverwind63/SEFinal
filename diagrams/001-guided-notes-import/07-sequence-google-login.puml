@@ -1,0 +1,25 @@
+@startuml
+title 時序圖 4：老師以 OAuth 授權 Google Sheets（FR-027）
+autonumber
+actor "老師" as T
+participant "終端機\nlogin-google 指令" as CLI
+participant "瀏覽器" as B
+participant "Google 帳號與授權" as G
+database "token 檔\n（GB_GOOGLE_TOKEN_FILE，權限 600）" as F
+participant "伺服器啟動" as SRV
+T -> CLI : uv run python -m guided_buzz login-google
+CLI -> CLI : 讀取 GB_GOOGLE_OAUTH_CLIENT_FILE（不存在則以繁體中文說明並結束）
+CLI -> B : 開啟授權頁（本機回呼網址）
+T -> G : 以自己的 Google 帳號登入並同意\n（試算表讀寫、帳號 email）
+G --> CLI : 授權碼 → access token、refresh token、id token
+CLI -> F : 寫入 token 與帳號 email（不輸出 token 內容）
+CLI --> T : 已登入：<email>
+== 之後每次啟動 ==
+SRV -> F : 讀取 token 檔
+alt 檔案不存在或格式錯誤
+  SRV --> T : 拒絕啟動，提示先執行 login-google
+else 正常
+  SRV -> SRV : 建立 GoogleSheetsGateway（access token 過期時由 google-auth 自動更新）
+end
+note over SRV, G : refresh token 被撤銷或過期時，匯入／寫回回應 503 GOOGLE_AUTH_EXPIRED
+@enduml

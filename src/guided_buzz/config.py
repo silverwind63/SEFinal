@@ -17,7 +17,8 @@ class ConfigError(Exception):
 @dataclass(frozen=True)
 class Settings:
     teacher_password: str = field(repr=False)
-    google_credentials_file: Path
+    google_oauth_client_file: Path
+    google_token_file: Path
     data_dir: Path
     host: str
     port: int
@@ -57,9 +58,11 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         return value
 
     password = text("GB_TEACHER_PASSWORD", required=True)
-    key_file = text("GB_GOOGLE_CREDENTIALS_FILE", required=True)
-    if key_file and not Path(key_file).is_file():
-        problems.append("GB_GOOGLE_CREDENTIALS_FILE 指向的金鑰檔不存在")
+    client_file = text("GB_GOOGLE_OAUTH_CLIENT_FILE", required=True)
+    if client_file and not Path(client_file).is_file():
+        problems.append("GB_GOOGLE_OAUTH_CLIENT_FILE 指向的 OAuth client 設定檔不存在")
+    data_dir = Path(text("GB_DATA_DIR", "./var"))
+    token_file = env.get("GB_GOOGLE_TOKEN_FILE", "").strip()
     labels = (
         text("GB_HEADER_LABEL_NUMBER", "題號"),
         text("GB_HEADER_LABEL_QUESTION", "題目"),
@@ -68,8 +71,9 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
     results_dir = env.get("GB_RESULTS_DIR", "").strip()
     settings = Settings(
         teacher_password=password,
-        google_credentials_file=Path(key_file),
-        data_dir=Path(text("GB_DATA_DIR", "./var")),
+        google_oauth_client_file=Path(client_file),
+        google_token_file=Path(token_file) if token_file else data_dir / "google-token.json",
+        data_dir=data_dir,
         host=text("GB_HOST", "127.0.0.1"),
         port=number("GB_PORT", "8000", high=65535),
         sheets_timeout_seconds=number("GB_SHEETS_TIMEOUT_SECONDS", "10", cast=float),

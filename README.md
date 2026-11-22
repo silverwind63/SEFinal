@@ -15,30 +15,42 @@
 
 - macOS 或 Linux，已安裝 [`uv`](https://docs.astral.sh/uv/)（會自動準備 Python 3.12）
 - 匯入與寫回需要網路連線；自動化測試不需要
-- 一個 Google 帳號，用來建立 service account（見下方）
+- 一個 Google 帳號，用來建立 OAuth client（見下方）
 - 修改圖表時需要 Java 與 PlantUML（`brew install plantuml`）
 
-## 一次性設定：Google service account
+## 一次性設定：Google OAuth
 
-系統以 service account（系統帳號）直接讀寫 Google Sheets。每位組員在自己的電腦各做一次：
+系統以老師自己的 Google 帳號（OAuth）直接讀寫 Google Sheets。每位組員在自己的電腦各做一次。OAuth client 設定檔與登入後的 token 檔**不可**放進 repo，也不可透過聊天或雲端硬碟傳給別人。
 
 1. 到 Google Cloud Console 建立專案，啟用「Google Sheets API」。
-2. 建立 service account，下載 JSON 金鑰，存放在 **repo 以外**的位置（例如 `~/.config/guided-buzz/sa.json`）。
-3. 記下 service account 的 email（形如 `xxx@<專案>.iam.gserviceaccount.com`）。
-4. 在 Google Sheets 把學習單「共用」給這個 email，權限設為「編輯者」。
+2. 設定「OAuth 同意畫面」：使用者類型選「外部」，並把要登入的 Google 帳號（組員、Demo 用帳號）加入「測試使用者」。
+3. 建立 OAuth client，應用程式類型選「**桌面應用程式**」，下載 client JSON，存放在 repo 以外的位置
+   （例如 `~/.config/guided-buzz/oauth-client.json`）。
+4. 在 `.env` 設定 `GB_GOOGLE_OAUTH_CLIENT_FILE` 指向這個檔案，然後執行：
 
-金鑰檔不可放進 repo，也不可透過聊天或雲端硬碟傳給別人。
+   ```bash
+   uv run python -m guided_buzz login-google
+   ```
+
+   瀏覽器會開啟 Google 登入頁，以老師（或 Demo 用）的帳號登入並同意。完成後終端機顯示登入的帳號，
+   token 存到 `GB_GOOGLE_TOKEN_FILE`（預設 `<GB_DATA_DIR>/google-token.json`，權限 600）。
+5. 之後這個帳號能編輯的試算表都能直接匯入與寫回。助教以另一份學習單測試時，請擁有者把試算表共用給登入的帳號
+   （編輯者），或複製一份到這個帳號的雲端硬碟。
+
+同意畫面在「測試中」狀態時，授權約 7 天後失效（依 Google 目前政策，以 Console 顯示為準）。
+**Demo 前請重新執行一次 `login-google`**；授權失效時，系統會在匯入或寫回時提示重新登入。
 
 ## 設定與啟動
 
 ```bash
 cp .env.example .env    # .env 已列入 .gitignore，不可提交
-# 編輯 .env，至少設定 GB_TEACHER_PASSWORD 與 GB_GOOGLE_CREDENTIALS_FILE
+# 編輯 .env，至少設定 GB_TEACHER_PASSWORD 與 GB_GOOGLE_OAUTH_CLIENT_FILE
 uv sync
+uv run python -m guided_buzz login-google   # 第一次使用，或授權失效時
 uv run python -m guided_buzz
 ```
 
-開啟 http://127.0.0.1:8000 ，以老師密碼登入。缺少必要環境變數或金鑰檔無效時，伺服器會拒絕啟動並說明原因。
+開啟 http://127.0.0.1:8000 ，以老師密碼登入。缺少必要環境變數或尚未登入 Google 時，伺服器會拒絕啟動並說明原因。
 
 ### 環境變數
 
@@ -47,7 +59,8 @@ uv run python -m guided_buzz
 | 變數 | 必填 | 用途（預設值） |
 |------|------|----------------|
 | `GB_TEACHER_PASSWORD` | ✅ | 老師登入密碼 |
-| `GB_GOOGLE_CREDENTIALS_FILE` | ✅ | service account 金鑰檔路徑 |
+| `GB_GOOGLE_OAUTH_CLIENT_FILE` | ✅ | OAuth client JSON（桌面應用程式）路徑 |
+| `GB_GOOGLE_TOKEN_FILE` | | `login-google` 儲存 token 的位置（`<GB_DATA_DIR>/google-token.json`） |
 | `GB_DATA_DIR` | | SQLite 資料庫目錄（`./var`） |
 | `GB_HOST`、`GB_PORT` | | 監聽位址與連接埠（`127.0.0.1`、`8000`） |
 | `GB_SHEETS_TIMEOUT_SECONDS` | | Sheets API 逾時秒數（10） |
@@ -78,7 +91,7 @@ uv run pytest -v
 CI 通過後才 merge 進 `main`。
 
 自動化測試一律使用 `FakeSheetsGateway` 取代 Google 服務，不連網。`tests/fixtures/sheets/` 的兩份範例快照目前是依規格
-**手動建構**；取得 service account 後，請用 `scripts/capture_sheet_fixture.py` 抓取真實範例覆蓋（見該目錄的 README）。
+**手動建構**；完成 OAuth 設定與 `login-google` 後，請用 `scripts/capture_sheet_fixture.py` 抓取真實範例覆蓋（見該目錄的 README）。
 需要實際連線 Google 的流程，請照 [quickstart](specs/001-guided-notes-import/quickstart.md) 的 V1–V7 人工驗證。
 
 ## 圖表
@@ -105,7 +118,7 @@ plantuml -tpng "./diagrams/**/*.puml"
 | FastAPI | Web 框架 | MIT |
 | Uvicorn | ASGI 伺服器 | BSD-3-Clause |
 | Pydantic | 輸入驗證 | MIT |
-| google-api-python-client、google-auth | Google Sheets API | Apache-2.0 |
+| google-api-python-client、google-auth、google-auth-oauthlib | Google Sheets API、OAuth 登入 | Apache-2.0 |
 | python-dotenv | 載入 `.env` | BSD-3-Clause |
 | pytest、HTTPX | 測試 | MIT、BSD-3-Clause |
 | PlantUML | 產生圖表（開發工具，不隨程式散布） | GPL（PlantUML 另提供其他授權版本） |
