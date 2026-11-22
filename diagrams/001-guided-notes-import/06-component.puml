@@ -1,0 +1,40 @@
+@startuml
+!pragma layout smetana
+title 組件圖：學習單匯入、答案寫回與結果匯出
+component "web/static\n老師頁面" as web
+cloud "Google Sheets API" as gapi
+package "guided_buzz" {
+  component "api\n路由・輸入驗證・錯誤格式" as api
+  component "auth\n老師登入・Token" as auth
+  component "worksheet.parser\n純函式：SpreadsheetGrid → ParsedWorksheet" as parser
+  component "worksheet.writeback\n純函式：挑出要寫入的空白填空格" as writeback
+  component "sheets\nSheetsGateway・GoogleSheetsGateway" as sheets
+  component "export.csv_export" as export
+  component "results\nJsonFileResultsProvider" as results
+  component "storage\nSQLite" as storage
+  component "config\n環境變數（含 Google 憑證路徑）" as config
+  component "domain\n共用資料結構・介面" as domain
+}
+component "002 搶答活動" as buzz
+web --> api : HTTP + Bearer Token
+api --> auth
+api --> parser
+api --> writeback
+api --> sheets
+api --> export
+api --> results
+api --> storage
+sheets --> gapi : HTTPS
+parser --> domain
+writeback --> domain
+sheets --> domain
+export --> domain
+results --> domain
+storage --> domain
+api --> domain
+api --> config
+auth --> config
+storage --> config
+sheets --> config
+buzz ..> domain : 實作 ActivityResultsProvider
+@enduml

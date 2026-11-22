@@ -1,0 +1,94 @@
+@startuml
+!pragma layout smetana
+title 類別圖：共用資料結構（定義在 domain 模組）
+class CellRef {
+  +sheet_id : int
+  +sheet_title : str
+  +cell : str
+}
+class SpreadsheetGrid {
+  +spreadsheet_id : str
+  +sheets : list<SheetGrid>
+}
+class SheetGrid {
+  +sheet_id : int
+  +title : str
+  +values : dict<str, str>
+  +merges : list<str>
+}
+class Blank {
+  +question_no : int
+  +location : CellRef
+  +source_label : str
+  +sub_label : str
+  +group_no : int
+}
+class QuestionGroup {
+  +group_no : int
+  +source_label : str
+  +question_nos : list<int>
+}
+class ParsedWorksheet {
+  +questions : list<Blank>
+  +groups : list<QuestionGroup>
+}
+class Worksheet {
+  +id : UUID
+  +owner : str
+  +spreadsheet_id : str
+  +structure_hash : str
+  +status : WorksheetStatus
+  +parsed : ParsedWorksheet
+}
+class ImportIssue {
+  +code : ImportErrorCode
+  +message : str
+  +sheet : str
+  +row : int
+  +cell : str
+}
+class WritebackResult {
+  +filled : list<int>
+  +unfilled : list<int>
+  +skipped_non_empty : list<int>
+}
+interface SheetsGateway {
+  +fetch_grid(spreadsheet_id) : SpreadsheetGrid
+  +write_cells(spreadsheet_id, values : dict<CellRef, str>)
+}
+class GoogleSheetsGateway {
+  憑證路徑來自環境變數
+}
+class FakeSheetsGateway {
+  測試用，不連網
+}
+class SubmissionRecord {
+  +question_nos : list<int>
+  +team_name : str
+  +answers : dict
+  +rank : int
+  +outcome : SubmissionOutcome
+}
+class ActivityResult {
+  +activity_id : UUID
+  +worksheet_id : UUID
+  +owner : str
+  +ended : bool
+  +submissions : list<SubmissionRecord>
+}
+interface ActivityResultsProvider {
+  +get_result(activity_id, requester) : ActivityResult
+}
+SpreadsheetGrid "1" *-- "1..*" SheetGrid
+Worksheet "1" *-- "1" ParsedWorksheet
+ParsedWorksheet "1" *-- "1..*" Blank
+ParsedWorksheet "1" *-- "0..*" QuestionGroup
+Blank --> CellRef
+QuestionGroup "1" o-- "2..*" Blank : question_nos
+GoogleSheetsGateway ..|> SheetsGateway
+FakeSheetsGateway ..|> SheetsGateway
+SheetsGateway ..> SpreadsheetGrid
+ActivityResult "1" *-- "0..*" SubmissionRecord
+ActivityResult --> Worksheet : worksheet_id
+ActivityResultsProvider ..> ActivityResult
+@enduml

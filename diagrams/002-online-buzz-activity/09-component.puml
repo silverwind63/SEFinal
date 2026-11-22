@@ -1,0 +1,39 @@
+@startuml
+!pragma layout smetana
+title 組件圖：線上分組搶答活動
+component "web/static\n老師頁面・學生頁面" as web
+package "guided_buzz" {
+  component "api\nactivity_routes・student_routes" as api
+  component "realtime\n連線管理・依身分產生推播" as realtime
+  component "activity.engine\n判定（純邏輯＋鎖）" as engine
+  component "activity.fairness" as fairness
+  component "activity.units\nParsedWorksheet→BuzzUnit" as units
+  component "auth.sessions\n老師／學生 Token・輸錯限制" as sessions
+  component "storage.activities" as astore
+  component "results.sqlite_provider" as provider
+  component "domain\n（001 已建立，新增列舉與 BuzzUnit）" as domain
+  component "storage.worksheets（001）" as wstore
+  component "config" as config
+}
+component "001 寫回／匯出" as f001
+web --> api : HTTP
+web --> realtime : WebSocket
+api --> engine
+api --> sessions
+api --> astore
+api --> wstore
+api --> units
+realtime --> sessions
+realtime --> engine
+engine --> fairness
+engine --> units
+engine --> astore
+engine --> domain
+provider --> astore
+provider --> domain
+api --> config
+engine --> config
+sessions --> config
+realtime --> config
+f001 --> provider
+@enduml

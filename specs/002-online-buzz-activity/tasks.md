@@ -8,7 +8,7 @@ description: "Task list for 002 線上分組搶答活動"
 **Input**: Design documents from `/specs/002-online-buzz-activity/`
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, diagrams.md, contracts/, quickstart.md；
-以及 **001 的 Phase 1、Phase 2 與 US1（001 tasks T001–T029）已完成**，因為本功能沿用其 config、domain、storage、auth、api 骨架與已確認的學習單
+以及 **001 的 Phase 1、Phase 2 與 US1（001 tasks T001–T033）已完成**，因為本功能沿用其 config、domain、storage、auth、api 骨架與已確認的學習單
 
 **Tests**: 包含測試任務（Constitution 原則 VI）。每個使用者情境都先撰寫測試、確認失敗，再進行實作。
 
@@ -24,7 +24,7 @@ description: "Task list for 002 線上分組搶答活動"
 
 ## Phase 1: Setup
 
-- [ ] T001 審閱 specs/002-online-buzz-activity/diagrams.md 的 9 張圖，確認與 spec.md、data-model.md、contracts/ 一致，並在檔案開頭註記審閱日期；未審閱不得開始 Phase 2（Constitution 原則 VII）
+- [ ] T001 以 PlantUML CLI 將 diagrams/002-online-buzz-activity/ 的 9 個 .puml 轉成 PNG，審閱 9 張圖是否與 spec.md、data-model.md、contracts/ 一致，並在 specs/002-online-buzz-activity/diagrams.md 開頭註記審閱日期；未審閱不得開始 Phase 2（Constitution 原則 VII）
 - [ ] T002 在 pyproject.toml 的開發相依套件加入 pytest-asyncio（asyncio_mode=auto），並在 src/guided_buzz/__main__.py 固定 uvicorn workers=1，加上註解說明原因（research.md R1）
 - [ ] T003 [P] 在 .env.example 加入 research.md R10 的所有新變數，只填佔位值與預設值說明
 
@@ -182,7 +182,7 @@ description: "Task list for 002 線上分組搶答活動"
 - [ ] T060 [P] 撰寫 tests/integration/test_latency.py：1 個老師與 12 個學生 WebSocket 連線，量測從 start 到所有連線收到 phase_changed 的時間 < 2 秒，以及送出後老師收到 submission 的時間 < 2 秒（SC-001）
 - [ ] T061 [P] 擴充 001 的 tests/integration/test_no_secrets.py：完成一場搶答活動後，caplog 中不含任何組別代碼、學生 Token、老師 Token 與答案字串
 - [ ] T062 [P] 更新 README.md：加入搶答活動的操作流程、新增的環境變數名稱與用途、固定 workers=1 的原因、以多個視窗模擬的方法
-- [ ] T063 對照實作更新 specs/002-online-buzz-activity/diagrams.md，確認 9 張圖與最終程式碼一致
+- [ ] T063 對照實作更新 diagrams/002-online-buzz-activity/ 的 .puml 並重新產生 PNG，確認 9 張圖與最終程式碼一致（Constitution 原則 VII 實作階段驗證）
 - [ ] T064 執行 `uv run pytest -v` 與 quickstart.md 的 V1–V7 人工驗證，並回報測試指令、通過與失敗數、失敗輸出及人工驗證結果（Constitution 原則 VI）
 
 ---
@@ -191,7 +191,7 @@ description: "Task list for 002 線上分組搶答活動"
 
 ### Phase Dependencies
 
-- **前提**：001 tasks T001–T029 已完成
+- **前提**：001 tasks T001–T033 已完成
 - **Setup (Phase 1)**：T001 是後續所有工作的前提
 - **Foundational (Phase 2)**：依賴 Setup
 - **US1 (Phase 3)**：依賴 Foundational
@@ -199,7 +199,7 @@ description: "Task list for 002 線上分組搶答活動"
 - **US3 (Phase 5)**：依賴 US2（需要有送出才能判定無效）
 - **US4 (Phase 6)**：依賴 US2；可以和 US3 平行
 - **US5 (Phase 7)**：依賴 US2；T052、T055 中與判定無效互動的部分依賴 US3
-- **Polish (Phase 8)**：依賴 US1–US4；T057、T058 另外依賴 001 的 US2、US3（001 tasks T030–T043）
+- **Polish (Phase 8)**：依賴 US1–US4；T057、T058 另外依賴 001 的 US2、US3（001 tasks T034–T047）
 
 ### Within Each User Story
 

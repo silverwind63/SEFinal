@@ -1,0 +1,49 @@
+@startuml
+title 時序圖 1：從 Google Sheets 匯入學習單並確認（US1）
+autonumber
+actor "老師（瀏覽器視窗）" as T
+participant "API 層" as API
+participant "身分驗證" as AUTH
+participant "SheetsGateway" as GW
+participant "Google Sheets API" as GAPI
+participant "學習單解析" as P
+database "儲存" as S
+T -> API : POST /api/worksheets {spreadsheet_url}＋Token
+API -> AUTH : [權限檢查] 驗證 Token 與老師身分
+alt Token 無效
+  AUTH --> T : 401 需要登入
+end
+API -> API : 驗證網址格式並取出試算表 ID
+alt 網址格式不正確
+  API --> T : 422 INVALID_SHEET_URL
+end
+API -> GW : fetch_grid(spreadsheet_id)
+GW -> GAPI : spreadsheets.get（儲存格值＋合併範圍）
+alt 沒有存取權限
+  GAPI --> GW : 403
+  GW --> API : SHEET_FORBIDDEN
+  API --> T : 403 請把試算表共用給系統帳號 <service account email>
+else 試算表不存在
+  GAPI --> GW : 404
+  API --> T : 404 SHEET_NOT_FOUND
+else 無法連線或逾時
+  API --> T : 503 SHEETS_UNAVAILABLE（可稍後重試）
+else 讀取成功
+  GAPI --> GW : 工作表、儲存格值、merges
+  GW --> API : SpreadsheetGrid（與來源無關的表格資料）
+end
+API -> P : parse(SpreadsheetGrid, 表頭標籤, 題數上限)
+P -> P : 找表頭 → 題目列 → 填空格 → 題組 → 編號
+alt 有驗證問題
+  P --> API : ImportIssue 清單（含工作表與列／儲存格）
+  API --> T : 422 所有問題與位置
+else 解析成功
+  P --> API : ParsedWorksheet
+  API -> S : 保存試算表 ID、工作表識別、解析結果、結構指紋，狀態 pending
+  API --> T : 201 題數、題組、題號與位置對照
+end
+T -> API : POST /api/worksheets/{id}/confirm
+API -> AUTH : [權限檢查] 是否為擁有者（否則 404）
+API -> S : [判定] pending → confirmed（不是 pending 時回 409）
+API --> T : 200 已確認
+@enduml

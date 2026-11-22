@@ -1,0 +1,17 @@
+@startuml
+!pragma layout smetana
+title 狀態圖 2：搶答單位
+state "尚無人搶答" as Empty
+state "已搶答" as Won
+state "開放中" as Reopened
+state "無人搶答" as NoWinner
+[*] --> Empty
+Empty --> Won : 第一筆合法送出
+Won --> Won : 後續送出（not_won，順位遞增）
+Won --> Won : 判定無效且有下一順位（遞補）
+Won --> Reopened : 判定無效且沒有下一順位（搶答中）
+Won --> NoWinner : 判定無效且沒有下一順位（已結束）
+Reopened --> Won : 下一筆合法送出（被判無效的組不能再送）
+Empty --> NoWinner : 活動結束
+Reopened --> NoWinner : 活動結束
+@enduml

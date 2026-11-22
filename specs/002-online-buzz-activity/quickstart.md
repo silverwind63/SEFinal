@@ -5,7 +5,7 @@
 ## 前置需求
 
 - 001 的設定、安裝與啟動方式（見 [001 quickstart](../001-guided-notes-import/quickstart.md)）
-- 已在 001 匯入並確認範例 B（`tests/fixtures/worksheets/sample_b.xlsx`），共 6 題、2 個題組，所以有 4 個搶答單位：G1、G2、Q5、Q6
+- 已在 001 從 Google Sheets 匯入並確認範例 B 的副本（見 001 quickstart V2），共 6 題、2 個題組，所以有 4 個搶答單位：G1、G2、Q5、Q6
 - 同一台電腦、同一個瀏覽器，開啟多個**視窗或分頁**
 
 ## 自動化測試

@@ -1,0 +1,10 @@
+@startuml
+!pragma layout smetana
+title 狀態圖：學習單匯入狀態
+[*] --> pending : 從 Google Sheets 讀取並解析成功
+pending --> confirmed : 老師確認
+pending --> cancelled : 老師取消
+confirmed --> [*]
+cancelled --> [*]
+note right of confirmed : 只有 confirmed 可建立活動、寫回、匯出
+@enduml
