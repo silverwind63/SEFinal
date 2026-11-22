@@ -1,0 +1,33 @@
+@startuml
+title 循序圖 2：同時送出與公平機制（US2、US5）
+autonumber
+actor "第一組" as A
+actor "第二組" as B
+participant "HTTP API" as API
+participant "ActivityEngine（鎖）" as ENG
+participant "推播中心" as HUB
+par 幾乎同時送出
+  A -> API : POST /api/submissions {unit: Q5}
+else
+  B -> API : POST /api/submissions {unit: Q5}
+end
+API -> API : [權限檢查] 驗證學生 Token 與代碼版本
+API -> ENG : submit(第一組)（先取得鎖）
+ENG -> ENG : [判定] 階段 → 冷卻 → 單位 → 答案 → 是否已送出
+ENG -> ENG : [判定] 順位 1，Q5 沒有成功者 → success
+ENG -> ENG : [判定] 成功數 − 最少成功數 ≥ K？→ 第一組冷卻 N 秒
+ENG --> API : success, rank 1
+API -> ENG : submit(第二組)（後取得鎖）
+ENG -> ENG : [判定] 順位 2，Q5 已有成功者 → not_won
+ENG --> API : not_won, rank 2
+API --> A : 200 搶答成功！
+API --> B : 200 未搶到，第 2 順位
+ENG --> HUB : 事件（鎖釋放後）
+HUB --> A : team_submission、cooldown（只給第一組）
+HUB --> B : team_submission（只給第二組）
+note over HUB : 老師收到兩筆 submission 與 cooldown
+A -> API : 冷卻中送出 Q6
+API -> ENG : submit
+ENG --> API : [判定] COOLDOWN（不記錄、不佔順位）
+API --> A : 409 冷卻中，剩餘 7 秒
+@enduml

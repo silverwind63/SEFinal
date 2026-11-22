@@ -1,0 +1,32 @@
+@startuml
+title 循序圖 1：建立活動、學生加入、開始搶答（US1）
+autonumber
+actor "老師視窗" as T
+actor "學生視窗（第一組）" as S
+participant "HTTP API" as API
+participant "ActivityEngine（鎖）" as ENG
+participant "推播中心" as HUB
+database "SQLite" as DB
+T -> API : POST /api/activities {worksheet_id, teams}
+API -> API : [權限檢查] 老師 Token、擁有學習單、學習單已確認
+API -> ENG : 建立（沒有其他進行中的活動）
+ENG -> DB : activities(preparing)、teams(code_hash)
+API --> T : 201 單位清單、組別代碼
+T --> S : 課堂上私下告知第一組的代碼
+S -> API : POST /api/join {code}＋X-Window-Id
+API -> API : [權限檢查] 此視窗與全體的輸錯次數
+alt 代碼錯誤
+  API --> S : 401／達上限時 429
+else 正確
+  API --> S : 200 學生 Token（存入 sessionStorage）
+end
+S -> HUB : WS 連線，第一則訊息送 Token
+HUB -> HUB : [權限檢查] 驗證 Token
+HUB --> S : snapshot（只含本組資料）
+T -> API : POST /start
+API -> ENG : [判定] 在鎖內 preparing→running
+ENG -> DB : phase=running
+ENG --> HUB : phase_changed
+HUB --> T : phase_changed（2 秒內）
+HUB --> S : phase_changed（2 秒內）
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+title 循序圖 4：結束搶答與重啟（US1、FR-026、FR-027）
+autonumber
+actor "老師" as T
+participant "HTTP API" as API
+participant "ActivityEngine（鎖）" as ENG
+database "SQLite" as DB
+participant "推播中心" as HUB
+actor "學生視窗（重新整理）" as S
+T -> API : POST /end
+API -> ENG : end()
+ENG -> DB : 一筆交易寫入所有送出、答案，並設 phase=ended
+alt 寫入失敗
+  ENG --> API : PERSIST_FAILED（維持 running）
+  API --> T : 500 結果保存失敗，請再試一次
+else 成功
+  ENG -> ENG : 記憶體中的階段改為 ended
+  ENG --> HUB : phase_changed、snapshot（含完整結果）
+  API --> T : 200 ended
+end
+note over DB : 伺服器重啟時：preparing、running 的活動改為 interrupted
+S -> API : GET /api/activities/{id}/phase
+API --> S : interrupted → 顯示「活動已中斷，請老師重新建立」
+@enduml

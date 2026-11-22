@@ -1,0 +1,17 @@
+@startuml
+title 時序圖 3：匯出 CSV（US3）
+autonumber
+actor "老師" as T
+participant "API 層" as API
+participant "ActivityResultsProvider" as R
+participant "CSV 匯出" as E
+T -> API : GET /api/activities/{id}/results.csv
+API -> R : [權限檢查] get_result(id, 老師)（擁有者檢查）
+alt 活動未結束
+  API --> T : 409 INVALID_STATE
+end
+API -> E : to_csv(ActivityResult)
+E -> E : 題組送出依填空拆列、依題號與順位排序、UTF-8 BOM
+E --> API : CSV 內容與筆數
+API --> T : 200 text/csv（X-Record-Count）
+@enduml

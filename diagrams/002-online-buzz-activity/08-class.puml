@@ -1,0 +1,64 @@
+@startuml
+!pragma layout smetana
+title 類別圖：線上分組搶答活動
+class Activity {
+  +id : UUID
+  +worksheet_id : UUID
+  +owner : str
+  +phase : ActivityPhase
+  +fairness_enabled : bool
+  +cooldown_seconds : int
+  +cooldown_lead : int
+}
+class Team {
+  +id : int
+  +name : str
+  +code_hash : str
+  +code_version : int
+}
+class BuzzUnit {
+  +key : str
+  +question_nos : list<int>
+  +display : str
+}
+class Submission {
+  +id : int
+  +unit_key : str
+  +team_id : int
+  +answers : dict
+  +rank : int
+  +outcome : SubmissionOutcome
+  +received_at : datetime
+}
+class Cooldown {
+  +team_id : int
+  +until_monotonic : float
+  +trigger_submission_id : int
+}
+class ActivityEngine {
+  -lock : Lock
+  +start()
+  +submit(team_id, unit_key, answers) : SubmitResult
+  +invalidate(unit_key) : InvalidateResult
+  +end()
+  +view_for_teacher()
+  +view_for_team(team_id)
+}
+interface ActivityResultsProvider
+class SqliteActivityResultsProvider {
+  +get_result(activity_id, requester) : ActivityResult
+}
+Activity "1" *-- "1..*" Team
+Activity "1" *-- "1..*" BuzzUnit
+Activity "1" *-- "0..*" Submission
+Submission --> Team
+Submission --> BuzzUnit
+Cooldown --> Team
+Cooldown --> Submission : trigger
+ActivityEngine --> Activity : 管理
+SqliteActivityResultsProvider ..|> ActivityResultsProvider
+note right of BuzzUnit
+  由 001 的 ParsedWorksheet 產生
+  （題組 → G 鍵，單一題目 → Q 鍵）
+end note
+@enduml

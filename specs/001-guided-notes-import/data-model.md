@@ -3,7 +3,8 @@
 **Feature**: [spec.md](./spec.md) | **Plan**: [plan.md](./plan.md) | **Diagrams**: [diagrams.md](./diagrams.md)
 
 所有跨模組共用的資料結構**只在** `src/guided_buzz/domain/models.py` 定義一次（Constitution 原則 V），
-其他模組（parser、writeback、export、storage、api）與 002 一律從那裡引用。
+其他模組（parser、writeback、sheets、export、storage、api）與 002 一律從那裡引用。
+類別圖見 [`diagrams/001-guided-notes-import/04-class.puml`](../../diagrams/001-guided-notes-import/04-class.puml)。
 API 回應使用的 pydantic schema 定義在 `src/guided_buzz/api/schemas.py`，由 domain 模型轉換而來，不重複定義欄位規則。
 
 ## 共用列舉
@@ -20,8 +21,23 @@ API 回應使用的 pydantic schema 定義在 `src/guided_buzz/api/schemas.py`�
 
 | 欄位 | 型別 | 規則 |
 |------|------|------|
-| `sheet` | str | 工作表名稱，非空 |
+| `sheet_id` | int | Google Sheets 工作表 ID（工作表改名後仍不變），≥ 0 |
+| `sheet_title` | str | 工作表名稱，非空；只用於顯示與組成 A1 範圍 |
 | `cell` | str | A1 表示法，符合 `^[A-Z]{1,3}[1-9][0-9]*$` |
+
+### SpreadsheetGrid / SheetGrid（與來源無關的表格資料）
+
+由 `SheetsGateway` 產生，解析器與寫回規劃只處理這個結構，不直接接觸 Google API 回應。
+
+| 欄位 | 型別 | 規則 |
+|------|------|------|
+| `SpreadsheetGrid.spreadsheet_id` | str | 試算表 ID |
+| `SpreadsheetGrid.title` | str | 試算表名稱（只用於顯示） |
+| `SpreadsheetGrid.sheets` | list[SheetGrid] | 依工作表順序 |
+| `SheetGrid.sheet_id` | int | 工作表 ID |
+| `SheetGrid.title` | str | 工作表名稱 |
+| `SheetGrid.values` | dict[str, str] | A1 位置 → 顯示文字（`formattedValue`）；沒有值的儲存格不列出 |
+| `SheetGrid.merges` | list[str] | 合併範圍，A1 範圍表示法（如 `G5:H5`） |
 
 ### Blank（填空格）＝ Question（題目）
 
@@ -58,9 +74,9 @@ API 回應使用的 pydantic schema 定義在 `src/guided_buzz/api/schemas.py`�
 |------|------|------|
 | `id` | UUID | 系統產生 |
 | `owner` | str | 匯入的老師帳號識別 |
-| `original_filename` | str | 只用於顯示，長度 ≤ 255，不用於檔案路徑 |
-| `stored_path` | 相對路徑 | `uploads/<id>.xlsx`，相對於 `GB_DATA_DIR` |
-| `sha256` | str | 原始檔雜湊（R5） |
+| `spreadsheet_id` | str | Google Sheets 試算表 ID，符合 `^[A-Za-z0-9_-]{20,100}$` |
+| `spreadsheet_title` | str | 只用於顯示，長度 ≤ 255 |
+| `structure_hash` | str | 填空格位置清單的雜湊（結構指紋，R5） |
 | `status` | WorksheetStatus | 見狀態轉換 |
 | `parsed` | ParsedWorksheet | 匯入時的解析結果 |
 | `created_at` / `confirmed_at` | datetime | 伺服器時間 |
@@ -79,16 +95,17 @@ API 回應使用的 pydantic schema 定義在 `src/guided_buzz/api/schemas.py`�
 
 | 代碼 | 情況（對應 FR-013） |
 |------|------|
-| `FILE_TOO_LARGE` | 超過檔案大小上限 |
-| `FILE_EMPTY` | 空檔案 |
-| `NOT_XLSX` | 不是 .xlsx，或檔案已損毀無法讀取 |
+| `INVALID_SHEET_URL` | 輸入的不是 Google Sheets 網址或試算表 ID |
+| `SHEET_NOT_FOUND` | 試算表不存在 |
+| `SHEET_FORBIDDEN` | 系統帳號沒有存取權限（訊息包含要共用的 service account email，FR-025） |
+| `SHEETS_UNAVAILABLE` | Google 服務無法連線或逾時，可稍後重試 |
 | `HEADER_NOT_FOUND` | 所有工作表都找不到表頭列 |
 | `NO_QUESTION_ROWS` | 找不到任何題目列 |
 | `NO_BLANK_IN_ROW` | 題目列沒有填空格 |
 | `MULTIPLE_BLANKS_IN_ROW` | 題目列有兩段以上的空白區段 |
 | `GROUP_RANGE_INCOMPLETE` | 題組合併範圍內有不是題目列的列 |
 | `TOO_MANY_QUESTIONS` | 超過題數上限 |
-| `STRUCTURE_CHANGED` | 寫回前發現原始檔雜湊或填空格位置已改變（FR-019） |
+| `STRUCTURE_CHANGED` | 寫回前重新讀取，發現填空格位置與匯入時不同（FR-019） |
 
 ### SubmissionRecord（搶答紀錄，由 002 產生、001 唯讀）
 
@@ -115,15 +132,15 @@ API 回應使用的 pydantic schema 定義在 `src/guided_buzz/api/schemas.py`�
 
 | 欄位 | 型別 | 說明 |
 |------|------|------|
-| `file_id` | UUID | 產生的新檔案，存於 `writebacks/<file_id>.xlsx` |
-| `filled` | list[int] | 已填入答案的題號 |
+| `filled` | list[int] | 已寫入答案的題號 |
 | `unfilled` | list[int] | 沒有成功答案、維持空白的題號（FR-017） |
+| `skipped_non_empty` | list[int] | 有成功答案，但雲端填空格已有內容而未覆蓋的題號（FR-026） |
 
 ## SQLite 資料表（storage 模組內部）
 
-- `worksheets(id PK, owner, original_filename, stored_path, sha256, status, created_at, confirmed_at)`
-- `questions(worksheet_id FK, question_no, sheet, cell, source_label, sub_label, group_no, PK(worksheet_id, question_no))`
+- `worksheets(id PK, owner, spreadsheet_id, spreadsheet_title, structure_hash, status, created_at, confirmed_at)`
+- `questions(worksheet_id FK, question_no, sheet_id, sheet_title, cell, source_label, sub_label, group_no, PK(worksheet_id, question_no))`
 - `question_groups(worksheet_id FK, group_no, source_label, PK(worksheet_id, group_no))`
-- `writebacks(file_id PK, worksheet_id FK, activity_id, created_at)`
+- `writebacks(id PK, worksheet_id FK, activity_id, filled, unfilled, skipped_non_empty, created_at)`（寫回紀錄）
 
 資料表只由 storage 模組存取，其他模組透過 repository 函式取得 domain 物件。

@@ -1,0 +1,39 @@
+@startuml
+title 時序圖 2：答案寫回原 Google Sheets（US2）
+autonumber
+actor "老師" as T
+participant "API 層" as API
+participant "ActivityResultsProvider" as R
+database "儲存" as S
+participant "SheetsGateway" as GW
+participant "Google Sheets API" as GAPI
+participant "學習單解析" as P
+participant "寫回規劃" as W
+T -> API : POST /api/worksheets/{id}/writeback {activity_id}
+API -> S : [權限檢查] 讀取學習單（擁有者檢查、須為 confirmed）
+API -> R : get_result(activity_id, 老師)
+note over R : 伺服器保存的判定結果是唯一依據（FR-018）
+alt 活動不存在、不屬於本人或學習單不符
+  API --> T : 404
+else 活動未結束
+  API --> T : 409 INVALID_STATE
+end
+API -> GW : fetch_grid(spreadsheet_id)（重新讀取雲端內容）
+GW -> GAPI : spreadsheets.get
+GAPI --> GW : 目前的儲存格值與 merges
+GW --> API : SpreadsheetGrid
+API -> P : 重新解析，比對題目列與填空格位置（FR-019）
+alt 結構與匯入時不同
+  API --> T : 409 STRUCTURE_CHANGED（說明差異）
+end
+API -> W : plan(成功答案, 目前內容)
+W -> W : [判定] 只挑原本空白的填空格；已有內容者跳過（FR-026）
+W --> API : 要寫入的 {儲存格: 答案}、未填題號、跳過題號
+API -> GW : write_cells(spreadsheet_id, {儲存格: 答案})
+GW -> GAPI : values.batchUpdate（RAW，只含目標儲存格）
+alt 寫入失敗（權限被取消、無法連線）
+  API --> T : 403／503 清楚錯誤訊息，可重試
+else 成功
+  API --> T : 200 已填題號、未填題號、跳過（已有內容）題號
+end
+@enduml

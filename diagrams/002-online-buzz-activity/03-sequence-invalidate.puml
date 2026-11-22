@@ -1,0 +1,24 @@
+@startuml
+title 循序圖 3：判定無效與遞補（US3）
+autonumber
+actor "老師" as T
+participant "HTTP API" as API
+participant "ActivityEngine（鎖）" as ENG
+database "SQLite" as DB
+participant "推播中心" as HUB
+T -> API : POST /units/Q3/invalidate
+API -> API : [權限檢查] 老師 Token、擁有這場活動
+API -> ENG : invalidate(Q3)
+ENG -> ENG : [判定] 第一組 success → invalidated
+ENG -> ENG : [判定] 依順位找下一筆 not_won → 第二組 success
+ENG -> ENG : 若第一組正因這次成功冷卻 → 解除；遞補不觸發冷卻
+opt 活動已結束
+  ENG -> DB : 一筆交易更新兩筆送出的結果
+end
+opt 沒有下一順位
+  ENG -> ENG : 搶答中 → Q3 重新開放；已結束 → 無人搶答
+end
+ENG --> HUB : invalidated、promoted
+HUB --> T : 更新後的檢視
+note over HUB : 第一組收到「已被判定無效」，第二組收到「遞補成功」，都不含他組答案
+@enduml

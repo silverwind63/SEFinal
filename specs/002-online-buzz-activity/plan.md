@@ -50,7 +50,7 @@ auth、api 骨架，並使用 001 確認後的 `ParsedWorksheet`。
 | IV. 伺服器權威、公平一致、權限隔離 | ✅ | 單一鎖依序判定，忽略客戶端提供的時間（research R1、R5）；冷卻使用伺服器的 monotonic 時鐘；推播依身分分別產生，並有專門測試驗證不洩漏他組資料（contracts/websocket.md）；有同時送出測試，重複 100 次 |
 | V. 模組化與單一定義 | ✅ | `BuzzUnit`、`ActivityPhase`、`SubmissionRejectCode` 加到 001 的 `domain/`，不另建一份；引擎內部的狀態只在 `activity/state.py`；引擎不依賴 HTTP 或 WebSocket（diagrams 第 9 節） |
 | VI. 測試與驗證回報 | ✅ | 每個使用者情境都有正常與邊界測試；quickstart 提供 V1–V7 人工驗證步驟 |
-| VII. 圖表先行 | ✅ | [diagrams.md](./diagrams.md) 含 4 張循序圖（標示 🔒 權限檢查點與 ⚖ 判定點）、3 張狀態圖、類別圖、模組相依圖；**實作前需審閱** |
+| VII. PlantUML 設計優先 | ✅ | `diagrams/002-online-buzz-activity/` 含 4 張時序圖（標示 [權限檢查] 與 [判定] 點）、3 張狀態圖、類別圖、組件圖（.puml＋PNG），本計畫以其為藍圖（見 [diagrams.md](./diagrams.md)）；**實作前需審閱** |
 | 範圍限制（單機、多視窗） | ✅ | 每個視窗以 sessionStorage 保存獨立的 Token；輸錯限制以視窗 ID 計算，不以 IP 計算，另有全體上限（research R3） |
 
 **Post-design re-check（Phase 1 後）**：✅ 全部通過。有一項設計取捨需要說明：

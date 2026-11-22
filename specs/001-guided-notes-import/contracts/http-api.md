@@ -38,10 +38,14 @@
 
 | 項目 | 內容 |
 |------|------|
-| Request | `multipart/form-data`，欄位 `file`（.xlsx） |
+| Request | `{"spreadsheet_url": "<Google Sheets 網址或試算表 ID，1..2048 字元>"}` |
 | 201 | 預覽，狀態為 `pending`（見下方） |
-| 413 | `FILE_TOO_LARGE`（訊息包含上限值） |
-| 422 | `FILE_EMPTY` / `NOT_XLSX` / `HEADER_NOT_FOUND` / `NO_QUESTION_ROWS` / `NO_BLANK_IN_ROW` / `MULTIPLE_BLANKS_IN_ROW` / `GROUP_RANGE_INCOMPLETE` / `TOO_MANY_QUESTIONS` |
+| 403 | `SHEET_FORBIDDEN`：「系統沒有這份試算表的存取權限，請把試算表共用給 <service account email>（編輯者）。」 |
+| 404 | `SHEET_NOT_FOUND`：試算表不存在 |
+| 422 | `INVALID_SHEET_URL` / `HEADER_NOT_FOUND` / `NO_QUESTION_ROWS` / `NO_BLANK_IN_ROW` / `MULTIPLE_BLANKS_IN_ROW` / `GROUP_RANGE_INCOMPLETE` / `TOO_MANY_QUESTIONS` |
+| 503 | `SHEETS_UNAVAILABLE`：Google 服務無法連線或逾時，請稍後再試 |
+
+系統直接從雲端讀取試算表，不接受檔案上傳（助教 11/17 補充公告）。
 
 201 回應範例（範例 B 的節錄）：
 
@@ -49,7 +53,8 @@
 {
   "id": "6f1c…",
   "status": "pending",
-  "original_filename": "計概學習單.xlsx",
+  "spreadsheet_id": "1PXXwWiBKJNpPkLRoJLMzZWsAh4Jzn2bThHTeRAiq3Hg",
+  "spreadsheet_title": "計概學習單",
   "question_count": 6,
   "group_count": 2,
   "questions": [
@@ -86,22 +91,21 @@
 
 ## GET /api/worksheets
 
-200：`[{"id", "original_filename", "status", "question_count", "group_count", "created_at"}]`，只列出本人擁有的學習單。
+200：`[{"id", "spreadsheet_title", "status", "question_count", "group_count", "created_at"}]`，只列出本人擁有的學習單。
 
 ## POST /api/worksheets/{id}/writeback
 
 | 項目 | 內容 |
 |------|------|
 | Request | `{"activity_id": "<uuid>"}` |
-| 201 | `{"file_id": "…", "download_url": "/api/writebacks/<file_id>", "filled": [1,2,3,5], "unfilled": [4,6]}` |
+| 200 | `{"filled": [1,2,5], "unfilled": [3,4,6], "skipped_non_empty": []}`；答案已直接寫入原本的 Google Sheets |
 | 409 | `INVALID_STATE`：學習單未確認，或活動尚未結束 |
-| 409 | `STRUCTURE_CHANGED`：原始檔或填空格位置與匯入時不同（FR-019） |
+| 409 | `STRUCTURE_CHANGED`：重新讀取後，填空格位置與匯入時不同（FR-019），訊息說明差異 |
 | 404 | `NOT_FOUND`：活動不存在、不屬於本人，或不屬於這份學習單 |
+| 403 | `SHEET_FORBIDDEN`：系統帳號的存取權限已被取消 |
+| 503 | `SHEETS_UNAVAILABLE`：Google 服務無法連線或逾時，可稍後重試 |
 
-## GET /api/writebacks/{file_id}
-
-200：`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`，
-`Content-Disposition` 檔名為「<原檔名>_已填答.xlsx」（RFC 5987 編碼）。
+只寫入「有成功答案且目前仍為空白」的填空格；已有內容的填空格不覆蓋，列在 `skipped_non_empty`（FR-026）。
 
 ## GET /api/activities/{activity_id}/results.csv
 

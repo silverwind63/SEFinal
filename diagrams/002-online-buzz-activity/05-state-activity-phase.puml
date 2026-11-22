@@ -1,0 +1,11 @@
+@startuml
+!pragma layout smetana
+title 狀態圖 1：活動階段
+[*] --> preparing : 老師建立活動
+preparing --> running : 老師開始（至少 1 組、1 個單位）
+running --> ended : 老師結束（結果寫入資料庫成功）
+preparing --> interrupted : 伺服器重啟
+running --> interrupted : 伺服器重啟
+ended --> [*]
+interrupted --> [*]
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+!pragma layout smetana
+title 狀態圖 3：組別冷卻
+state "可送出" as Ready
+state "冷卻中" as Cooling
+[*] --> Ready
+Ready --> Cooling : 即時送出成功，且成功數 − 最少成功數 ≥ K（公平機制啟用時）
+Cooling --> Ready : 經過 N 秒（伺服器 monotonic 時鐘）
+Cooling --> Ready : 觸發冷卻的那筆成功被判定無效
+Cooling --> Cooling : 送出被拒（不記錄、不佔順位）
+@enduml
