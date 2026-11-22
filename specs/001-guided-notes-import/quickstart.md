@@ -10,16 +10,29 @@
 - Linux 或 macOS，已安裝 `uv`（`uv --version`）
 - 一般瀏覽器（Chrome 或 Firefox）
 - 匯入與寫回需要網路連線（直接讀寫雲端 Google Sheets）；自動化測試不需要網路
-- 一個 Google 帳號，用來建立 Google Cloud 專案與 service account（見下方一次性設定）
+- 一個 Google 帳號，用來建立 Google Cloud 專案與 OAuth client（見下方一次性設定）
 
-## 一次性設定：Google service account
+## 一次性設定：Google OAuth
 
-每位組員在自己的電腦各做一次。金鑰檔**不可**放進 repo，也不可透過聊天或雲端硬碟傳給別人。
+每位組員在自己的電腦各做一次。OAuth client 設定檔與登入後的 token 檔**不可**放進 repo，也不可透過聊天或雲端硬碟傳給別人。
 
 1. 到 Google Cloud Console 建立專案，啟用「Google Sheets API」。
-2. 建立 service account，下載 JSON 金鑰，存放在 repo 以外的位置（例如 `~/.config/guided-buzz/sa.json`）。
-3. 記下 service account 的 email（形如 `xxx@<專案>.iam.gserviceaccount.com`）。
-4. 在 Google Sheets 中把要匯入的學習單「共用」給這個 email，權限設為「編輯者」。
+2. 設定「OAuth 同意畫面」：使用者類型選「外部」，並把要登入的 Google 帳號（組員、Demo 用帳號）加入「測試使用者」。
+3. 建立 OAuth client，應用程式類型選「**桌面應用程式**」，下載 client JSON，存放在 repo 以外的位置
+   （例如 `~/.config/guided-buzz/oauth-client.json`）。
+4. 在 `.env` 設定 `GB_GOOGLE_OAUTH_CLIENT_FILE` 指向這個檔案，然後執行：
+
+   ```bash
+   uv run python -m guided_buzz login-google
+   ```
+
+   瀏覽器會開啟 Google 登入頁，以老師（或 Demo 用）的帳號登入並同意。完成後終端機顯示登入的帳號，
+   token 存到 `GB_GOOGLE_TOKEN_FILE`（預設 `<GB_DATA_DIR>/google-token.json`，權限 600）。
+5. 之後這個帳號能編輯的試算表都能直接匯入與寫回。助教以另一份學習單測試時，請擁有者把試算表共用給登入的帳號
+   （編輯者），或複製一份到這個帳號的雲端硬碟。
+
+同意畫面在「測試中」狀態時，授權約 7 天後失效（依 Google 目前政策，以 Console 顯示為準）。
+**Demo 前請重新執行一次 `login-google`**；授權失效時，系統會在匯入或寫回時提示重新登入。
 
 ## 設定
 
@@ -28,12 +41,12 @@ cp .env.example .env          # .env 已列入 .gitignore，不可提交
 # 編輯 .env，至少設定：
 #   GB_TEACHER_PASSWORD=<自行設定的密碼>
 #   GB_DATA_DIR=<資料目錄，例如 ./var>
-#   GB_GOOGLE_CREDENTIALS_FILE=<service account 金鑰檔的完整路徑>
+#   GB_GOOGLE_OAUTH_CLIENT_FILE=<OAuth client JSON 的完整路徑>
 uv sync                        # 依 .python-version 建立 Python 3.12 環境並安裝相依套件
 ```
 
-未設定 `GB_TEACHER_PASSWORD` 或 `GB_GOOGLE_CREDENTIALS_FILE`（或金鑰檔不存在）時，伺服器必須拒絕啟動，
-並以繁體中文說明缺少哪一個環境變數，且不顯示金鑰內容。
+未設定 `GB_TEACHER_PASSWORD` 或 `GB_GOOGLE_OAUTH_CLIENT_FILE`（或設定檔不存在）時，伺服器必須拒絕啟動，
+並以繁體中文說明缺少哪一個環境變數；尚未執行 `login-google` 時，伺服器拒絕啟動並提示登入指令。都不顯示憑證或 token 內容。
 
 ## 啟動
 
@@ -58,7 +71,7 @@ uv run pytest tests/integration -v                  # API、權限、錯誤格�
 ## 人工驗證步驟
 
 以下步驟會讀寫真實的 Google Sheets。請先在自己的雲端硬碟建立範例 A、範例 B 的**副本**，
-並共用給 service account，不要直接修改原始範例。
+（登入的帳號建立的副本本身就有編輯權限），不要直接修改原始範例。
 
 ### V1：匯入範例 A（US1 情境 1）
 
@@ -77,14 +90,14 @@ uv run pytest tests/integration -v                  # API、權限、錯誤格�
 
 1. 匯入任一範例後按「取消」，**預期**：狀態變成「已取消」，無法再確認。
 2. 輸入 `https://example.com/abc`，**預期**：「網址格式不正確」。
-3. 輸入一份**沒有**共用給 service account 的試算表網址，**預期**：拒絕匯入，訊息中顯示要共用的 service account email。
+3. 輸入一份登入的帳號**沒有**編輯權限的試算表網址，**預期**：拒絕匯入，訊息中顯示目前登入的帳號，並說明如何取得權限。
 4. 在範例 A 副本刪除「作答」表頭後匯入，**預期**：「找不到表頭列」，並說明應有的三個表頭。
 5. 在範例 A 副本的 G7 預先填入文字後匯入，**預期**：拒絕匯入，並指出「學習單」第 7 列沒有填空格。
 
 ### V4：不同排版（SC-001）
 
 1. 在 Google Sheets 建立一份新學習單：表頭放在第 2 列、「作答」欄放在 B 欄、「題目」欄放在 C:E，共 3 題，
-   其中第 2、3 題的題號儲存格縱向合併；共用給 service account 後匯入。
+   其中第 2、3 題的題號儲存格縱向合併；匯入。
 2. **預期**：題數 3、題組 1（系統題號 2、3），填空格位置正確，不需要任何額外設定。
 
 ### V5：寫回（US2）
@@ -114,3 +127,9 @@ uv run pytest tests/integration -v                  # API、權限、錯誤格�
 1. 不帶 Token 呼叫 `GET /api/worksheets`，**預期**：401。
 2. 以錯誤密碼連續登入超過上限，**預期**：暫時被限制，並顯示剩餘等待時間。
 3. 在另一個瀏覽器視窗不登入，直接呼叫寫回 API，**預期**：401，雲端試算表沒有任何改變。
+
+### V8：Google 授權（FR-025、FR-027）
+
+1. 刪除 token 檔後啟動伺服器，**預期**：拒絕啟動，提示執行 `login-google`。
+2. 到 Google 帳號的「第三方應用程式存取權」撤銷本系統的授權，再匯入一份學習單，
+   **預期**：回應「Google 授權已失效」並提示重新登入的指令；重新執行 `login-google` 並重啟後恢復正常。

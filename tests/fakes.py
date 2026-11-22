@@ -11,7 +11,7 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures" / "sheets"
 
 
 class FakeSheetsGateway:
-    service_account_email = "buzz-bot@example-project.iam.gserviceaccount.com"
+    account_email = "teacher@example.com"
 
     def __init__(self):
         self.sheets: dict[str, SpreadsheetGrid] = {}

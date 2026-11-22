@@ -97,7 +97,8 @@ API 回應使用的 pydantic schema 定義在 `src/guided_buzz/api/schemas.py`�
 |------|------|
 | `INVALID_SHEET_URL` | 輸入的不是 Google Sheets 網址或試算表 ID |
 | `SHEET_NOT_FOUND` | 試算表不存在 |
-| `SHEET_FORBIDDEN` | 系統帳號沒有存取權限（訊息包含要共用的 service account email，FR-025） |
+| `SHEET_FORBIDDEN` | 目前登入的 Google 帳號沒有編輯權限（訊息包含該帳號 email，FR-025） |
+| `GOOGLE_AUTH_EXPIRED` | Google 授權過期或被撤銷，需重新執行登入指令（FR-027） |
 | `SHEETS_UNAVAILABLE` | Google 服務無法連線或逾時，可稍後重試 |
 | `HEADER_NOT_FOUND` | 所有工作表都找不到表頭列 |
 | `NO_QUESTION_ROWS` | 找不到任何題目列 |

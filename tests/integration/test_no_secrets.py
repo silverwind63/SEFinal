@@ -15,7 +15,7 @@ SECRET_ANSWER = "只屬於學生的答案-XYZ"
 
 def test_full_flow_logs_no_secrets(client, sheets, settings, caplog):
     caplog.set_level(logging.DEBUG)
-    settings.google_credentials_file.write_text('{"private_key": "KEY-CONTENT-123"}', encoding="utf-8")
+    settings.google_oauth_client_file.write_text('{"installed": {"client_secret": "KEY-CONTENT-123"}}', encoding="utf-8")
     token = client.post("/api/auth/teacher-login", json={"password": PASSWORD}).json()["token"]
     auth = {"Authorization": f"Bearer {token}"}
     sheets.add_fixture("sample_b")
@@ -42,4 +42,5 @@ def test_source_and_fixtures_have_no_hardcoded_secrets_or_paths():
         text = path.read_text(encoding="utf-8")
         assert not re.search(r"(/Users/|/home/|[A-Z]:\\\\)", text), path
         assert "private_key" not in text and "PRIVATE KEY" not in text, path
+        assert not re.search(r'"(refresh_token|client_secret)"\s*:\s*"[^"]+"', text), path
         assert not re.search(r"(?i)password\s*=\s*['\"][^'\"]+['\"]", text), path

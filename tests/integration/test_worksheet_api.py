@@ -39,11 +39,11 @@ def test_invalid_url(client, auth):
     assert res.status_code == 422 and res.json()["error"]["code"] == "INVALID_SHEET_URL"
 
 
-def test_forbidden_names_service_account(client, auth, sheets):
-    sheets.fetch_errors[SAMPLE_B] = SheetForbidden(sheets.service_account_email)
+def test_forbidden_names_logged_in_account(client, auth, sheets):
+    sheets.fetch_errors[SAMPLE_B] = SheetForbidden(sheets.account_email)
     res = client.post("/api/worksheets", json={"spreadsheet_url": URL_B}, headers=auth)
     assert res.status_code == 403 and res.json()["error"]["code"] == "SHEET_FORBIDDEN"
-    assert sheets.service_account_email in res.json()["error"]["message"]
+    assert sheets.account_email in res.json()["error"]["message"]
 
 
 def test_not_found_and_unavailable(client, auth, sheets):

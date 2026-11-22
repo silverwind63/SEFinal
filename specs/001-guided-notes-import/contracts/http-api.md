@@ -49,10 +49,11 @@
 |------|------|
 | Request | `{"spreadsheet_url": "<Google Sheets 網址或試算表 ID，1..2048 字元>"}` |
 | 201 | 預覽，狀態為 `pending`（見下方） |
-| 403 | `SHEET_FORBIDDEN`：「系統沒有這份試算表的存取權限，請把試算表共用給 <service account email>（編輯者）。」 |
+| 403 | `SHEET_FORBIDDEN`：「目前登入的 Google 帳號（<email>）沒有這份試算表的編輯權限，請改用有權限的帳號重新登入，或請擁有者把試算表共用給這個帳號（編輯者）。」 |
 | 404 | `SHEET_NOT_FOUND`：試算表不存在 |
 | 422 | `INVALID_SHEET_URL` / `HEADER_NOT_FOUND` / `NO_QUESTION_ROWS` / `NO_BLANK_IN_ROW` / `MULTIPLE_BLANKS_IN_ROW` / `GROUP_RANGE_INCOMPLETE` / `TOO_MANY_QUESTIONS` |
 | 503 | `SHEETS_UNAVAILABLE`：Google 服務無法連線或逾時，請稍後再試 |
+| 503 | `GOOGLE_AUTH_EXPIRED`：Google 授權已失效，訊息包含重新登入的指令 |
 
 系統直接從雲端讀取試算表，不接受檔案上傳（助教 11/17 補充公告）。
 
@@ -111,7 +112,8 @@
 | 409 | `INVALID_STATE`：學習單未確認，或活動尚未結束 |
 | 409 | `STRUCTURE_CHANGED`：重新讀取後，填空格位置與匯入時不同（FR-019），訊息說明差異 |
 | 404 | `NOT_FOUND`：活動不存在、不屬於本人，或不屬於這份學習單 |
-| 403 | `SHEET_FORBIDDEN`：系統帳號的存取權限已被取消 |
+| 403 | `SHEET_FORBIDDEN`：登入的帳號已沒有這份試算表的編輯權限 |
+| 503 | `GOOGLE_AUTH_EXPIRED`：Google 授權已失效，需重新登入 |
 | 503 | `SHEETS_UNAVAILABLE`：Google 服務無法連線或逾時，可稍後重試 |
 
 只寫入「有成功答案且目前仍為空白」的填空格；已有內容的填空格不覆蓋，列在 `skipped_non_empty`（FR-026）。

@@ -31,7 +31,7 @@ description: "Task list for 001 學習單匯入、答案寫回與結果匯出"
 - [X] T002 建立 pyproject.toml（套件名稱 guided-buzz，src 結構；相依套件：fastapi、uvicorn、pydantic>=2、google-api-python-client、google-auth、python-dotenv；開發用：pytest、httpx；設定 pytest 的 testpaths=tests）與 .python-version（內容為 3.12），並執行 `uv sync` 確認可以安裝
 - [X] T003 [P] 建立 .gitignore（.env、.venv/、var/、__pycache__/、*.pyc、.pytest_cache/、.secrets/、*service-account*.json、.DS_Store）與 .env.example，列出 research R10 的所有 GB_* 變數，只填佔位值與預設值說明（GB_TEACHER_PASSWORD=change-me、GB_GOOGLE_CREDENTIALS_FILE=/path/to/service-account.json）
 - [X] T004 [P] 依 plan.md 的 Source Code 結構建立 src/guided_buzz/ 下各子套件（domain、worksheet、sheets、export、results、storage、auth、api、web/static）與 tests/unit、tests/integration、tests/fixtures/sheets，並加入 __init__.py
-- [ ] T005 [P] 撰寫一次性手動腳本 scripts/capture_sheet_fixture.py：以 GB_GOOGLE_CREDENTIALS_FILE 呼叫 spreadsheets.get（欄位同 research R3），把範例 A、B（spec.md「參考範例學習單」的兩個網址）的回應存成 tests/fixtures/sheets/sample_a.json 與 sample_b.json；執行後確認兩份都有「學習單」工作表，且檔案內不含任何憑證。此腳本不屬於自動化測試
+- [ ] T005 [P] 撰寫一次性手動腳本 scripts/capture_sheet_fixture.py：以 login-google 取得的 OAuth token 呼叫 spreadsheets.get（欄位同 research R3），把範例 A、B（spec.md「參考範例學習單」的兩個網址）的回應存成 tests/fixtures/sheets/sample_a.json 與 sample_b.json；執行後確認兩份都有「學習單」工作表，且檔案內不含任何憑證。此腳本不屬於自動化測試（腳本已完成，待完成 OAuth 設定後執行）
 
 ---
 
@@ -144,7 +144,19 @@ description: "Task list for 001 學習單匯入、答案寫回與結果匯出"
 - [X] T049 [P] 撰寫 tests/integration/test_no_secrets.py：完成匯入、寫回、匯出的完整流程後，確認 caplog 中不含測試密碼、Token、金鑰檔內容與答案字串；並掃描 src/ 與 tests/fixtures/ 中不含寫死的絕對路徑、密碼字面值與 private_key 字樣
 - [X] T050 [P] 在 tests/unit/test_parser.py 新增效能測試：100 題與 500 題的動態產生學習單，解析時間 < 10 秒（SC-002 中屬於本機的部分）
 - [X] T051 對照實作更新 diagrams/001-guided-notes-import/ 的 .puml 並重新產生 PNG，確認 6 張圖與最終程式碼一致（Constitution 原則 VII 實作階段驗證、品質關卡第 4 項）
-- [ ] T052 執行 `uv run pytest -v` 與 quickstart.md 的 V1–V7 人工驗證，並將測試指令、通過與失敗數、失敗輸出，以及人工驗證結果回報給使用者（Constitution 原則 VI）
+- [ ] T052 執行 `uv run pytest -v` 與 quickstart.md 的 V1–V8 人工驗證，並將測試指令、通過與失敗數、失敗輸出，以及人工驗證結果回報給使用者（Constitution 原則 VI）
+
+---
+
+## Phase 7: 改用 OAuth 存取 Google Sheets（2026-11-22 組內決議）
+
+**Purpose**: 以老師自己的 Google 帳號（OAuth）取代 service account，兩組一致（spec Clarifications、FR-025、FR-027、research R13）
+
+- [X] T053 更新 spec.md、research.md、plan.md、data-model.md、contracts/http-api.md 的認證方式與錯誤代碼（新增 GOOGLE_AUTH_EXPIRED）
+- [X] T054 更新 diagrams/001-guided-notes-import/（01 時序圖錯誤分支、04 類別圖、06 組件圖），新增 07-sequence-google-login.puml，並重新產生 PNG
+- [X] T055 [P] 撰寫 tests/unit/test_google_auth.py（登入後 token 檔權限 600、讀回憑證與帳號 email、缺少或損毀的 token 檔提示登入指令），並更新 test_config、test_google_gateway（401 與 RefreshError → GOOGLE_AUTH_EXPIRED）、conftest 與 fakes
+- [X] T056 實作 src/guided_buzz/sheets/google_auth.py（login、load_credentials）與 `python -m guided_buzz login-google` 指令；config 改用 GB_GOOGLE_OAUTH_CLIENT_FILE、GB_GOOGLE_TOKEN_FILE；GoogleSheetsGateway 改用使用者憑證並以 account_email 組成無權限訊息
+- [X] T057 [P] 更新 quickstart（一次性 OAuth 設定、V8 授權驗證）、README、.env.example、.gitignore 與前端提示文字
 
 ---
 

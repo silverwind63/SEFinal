@@ -55,11 +55,16 @@ class WritebackResult {
   +skipped_non_empty : list<int>
 }
 interface SheetsGateway {
+  +account_email : str
   +fetch_grid(spreadsheet_id) : SpreadsheetGrid
   +write_cells(spreadsheet_id, values : dict<CellRef, str>)
 }
 class GoogleSheetsGateway {
-  憑證路徑來自環境變數
+  使用老師的 OAuth 使用者憑證
+}
+class GoogleLogin {
+  +login(client_file, token_file) : str
+  +load_credentials(token_file) : (Credentials, email)
 }
 class FakeSheetsGateway {
   測試用，不連網
@@ -88,6 +93,7 @@ ParsedWorksheet "1" *-- "0..*" QuestionGroup
 Blank --> CellRef
 QuestionGroup "1" o-- "2..*" Blank : question_nos
 GoogleSheetsGateway ..|> SheetsGateway
+GoogleSheetsGateway ..> GoogleLogin : 啟動時載入憑證
 FakeSheetsGateway ..|> SheetsGateway
 SheetsGateway ..> SpreadsheetGrid
 ActivityResult "1" *-- "0..*" SubmissionRecord

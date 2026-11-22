@@ -11,6 +11,7 @@ class ImportErrorCode(str, Enum):
     SHEET_NOT_FOUND = "SHEET_NOT_FOUND"
     SHEET_FORBIDDEN = "SHEET_FORBIDDEN"
     SHEETS_UNAVAILABLE = "SHEETS_UNAVAILABLE"
+    GOOGLE_AUTH_EXPIRED = "GOOGLE_AUTH_EXPIRED"
     HEADER_NOT_FOUND = "HEADER_NOT_FOUND"
     NO_QUESTION_ROWS = "NO_QUESTION_ROWS"
     NO_BLANK_IN_ROW = "NO_BLANK_IN_ROW"
@@ -23,8 +24,9 @@ class ImportErrorCode(str, Enum):
 MESSAGES = {
     ImportErrorCode.INVALID_SHEET_URL: "網址格式不正確，請貼上 Google Sheets 試算表的網址（https://docs.google.com/spreadsheets/d/…）或試算表 ID。",
     ImportErrorCode.SHEET_NOT_FOUND: "找不到這份試算表，請確認網址是否正確。",
-    ImportErrorCode.SHEET_FORBIDDEN: "系統沒有這份試算表的存取權限，請把試算表共用給 {email}（編輯者）。",
+    ImportErrorCode.SHEET_FORBIDDEN: "目前登入的 Google 帳號（{email}）沒有這份試算表的編輯權限，請改用有權限的帳號重新登入，或請擁有者把試算表共用給這個帳號（編輯者）。",
     ImportErrorCode.SHEETS_UNAVAILABLE: "目前無法連線到 Google Sheets，請稍後再試。",
+    ImportErrorCode.GOOGLE_AUTH_EXPIRED: "Google 授權已失效或被撤銷，請在終端機執行 `uv run python -m guided_buzz login-google` 重新登入，並重新啟動伺服器。",
     ImportErrorCode.HEADER_NOT_FOUND: "找不到表頭列：學習單中必須有一列同時包含「{labels}」三個表頭。",
     ImportErrorCode.NO_QUESTION_ROWS: "表頭以下找不到任何題目列（「{label}」欄位有文字的列）。",
     ImportErrorCode.NO_BLANK_IN_ROW: "工作表「{sheet}」第 {row} 列沒有填空格：「{label}」欄位範圍內必須有一個空白儲存格。",
@@ -118,3 +120,8 @@ class SheetForbidden(ImportFailed):
 class SheetsUnavailable(ImportFailed):
     def __init__(self):
         super().__init__([issue(ImportErrorCode.SHEETS_UNAVAILABLE)])
+
+
+class GoogleAuthExpired(ImportFailed):
+    def __init__(self):
+        super().__init__([issue(ImportErrorCode.GOOGLE_AUTH_EXPIRED)])

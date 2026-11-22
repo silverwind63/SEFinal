@@ -22,6 +22,7 @@ java -jar plantuml.jar -tpng "./diagrams/**/*.puml"
 | 4 | 類別圖：共用資料結構 | [04-class.puml](../../diagrams/001-guided-notes-import/04-class.puml) | 共用資料結構 |
 | 5 | 狀態圖：學習單匯入狀態 | [05-state-worksheet.puml](../../diagrams/001-guided-notes-import/05-state-worksheet.puml) | US1 |
 | 6 | 組件圖：模組相依 | [06-component.puml](../../diagrams/001-guided-notes-import/06-component.puml) | 架構 |
+| 7 | 時序圖：老師以 OAuth 授權 Google Sheets | [07-sequence-google-login.puml](../../diagrams/001-guided-notes-import/07-sequence-google-login.puml) | FR-025、FR-027 |
 
 ## 預覽
 
@@ -31,6 +32,7 @@ java -jar plantuml.jar -tpng "./diagrams/**/*.puml"
 ![類別圖](../../diagrams/001-guided-notes-import/04-class.png)
 ![狀態圖](../../diagrams/001-guided-notes-import/05-state-worksheet.png)
 ![組件圖](../../diagrams/001-guided-notes-import/06-component.png)
+![時序圖 4：OAuth 授權](../../diagrams/001-guided-notes-import/07-sequence-google-login.png)
 
 ## 設計規則
 

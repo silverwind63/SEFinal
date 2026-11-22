@@ -6,12 +6,14 @@ import httplib2
 import pytest
 from googleapiclient.errors import HttpError
 
-from guided_buzz.domain.errors import SheetForbidden, SheetNotFound, SheetsUnavailable
+import google.auth.exceptions
+
+from guided_buzz.domain.errors import GoogleAuthExpired, SheetForbidden, SheetNotFound, SheetsUnavailable
 from guided_buzz.domain.models import CellRef
 from guided_buzz.sheets.google_gateway import GoogleSheetsGateway, a1_range, grid_from_response
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "sheets"
-EMAIL = "bot@proj.iam.gserviceaccount.com"
+EMAIL = "teacher@example.com"
 
 
 def load(name):
@@ -54,7 +56,7 @@ def http_error(status):
 
 
 def gateway(service):
-    return GoogleSheetsGateway(service=service, service_account_email=EMAIL)
+    return GoogleSheetsGateway(service=service, account_email=EMAIL)
 
 
 def test_sample_b_converts_values_and_merges():
@@ -82,7 +84,15 @@ def test_fetch_requests_only_needed_fields():
 
 @pytest.mark.parametrize(
     "error, expected",
-    [(http_error(403), SheetForbidden), (http_error(404), SheetNotFound), (http_error(500), SheetsUnavailable), (socket.timeout(), SheetsUnavailable), (ConnectionError(), SheetsUnavailable)],
+    [
+        (http_error(403), SheetForbidden),
+        (http_error(404), SheetNotFound),
+        (http_error(401), GoogleAuthExpired),
+        (google.auth.exceptions.RefreshError("invalid_grant"), GoogleAuthExpired),
+        (http_error(500), SheetsUnavailable),
+        (socket.timeout(), SheetsUnavailable),
+        (ConnectionError(), SheetsUnavailable),
+    ],
 )
 def test_errors_are_mapped(error, expected):
     with pytest.raises(expected) as exc:
@@ -90,7 +100,7 @@ def test_errors_are_mapped(error, expected):
     assert "raw google text" not in exc.value.message
 
 
-def test_forbidden_message_names_service_account():
+def test_forbidden_message_names_logged_in_account():
     with pytest.raises(SheetForbidden) as exc:
         gateway(FakeService(error=http_error(403))).fetch_grid("sid")
     assert EMAIL in exc.value.message
@@ -112,3 +122,9 @@ def test_write_nothing_makes_no_call():
 
 def test_a1_range_with_spaces():
     assert a1_range(CellRef(0, "Sheet 1", "A1")) == "'Sheet 1'!A1"
+
+
+def test_auth_expired_message_tells_how_to_log_in_again():
+    with pytest.raises(GoogleAuthExpired) as exc:
+        gateway(FakeService(error=google.auth.exceptions.RefreshError("invalid_grant"))).fetch_grid("sid")
+    assert "login-google" in exc.value.message and "invalid_grant" not in exc.value.message

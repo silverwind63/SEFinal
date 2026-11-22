@@ -126,7 +126,8 @@
 - **Decision**: 所有可調整的參數都以 `GB_` 開頭的環境變數提供（可用 `.env` 檔載入，`.env` 列入 `.gitignore`），
   並提供只含佔位值的 `.env.example`。可調參數包括：資料目錄、題數上限（預設 500）、
   表頭標籤（預設「題號」「題目」「作答」）、監聽位址（預設 `127.0.0.1`）與連接埠、Token 有效期限、
-  service account 金鑰檔路徑 `GB_GOOGLE_CREDENTIALS_FILE`（必填）、Sheets API 逾時秒數（預設 10）。
+  OAuth client 設定檔路徑 `GB_GOOGLE_OAUTH_CLIENT_FILE`（必填）、登入後 token 檔路徑 `GB_GOOGLE_TOKEN_FILE`
+  （預設 `<GB_DATA_DIR>/google-token.json`）、Sheets API 逾時秒數（預設 10）。
 - **Rationale**: 對應 Constitution 原則 I（不寫死）與 III（機敏資料只放環境變數）；
   預設只監聽本機位址，符合「只在單一電腦運作」的限制。
 
@@ -148,11 +149,16 @@
 
 ## R13. Google 認證方式
 
-- **Decision**: 使用 Google service account（系統帳號）。組員在自己的 Google Cloud 專案啟用 Sheets API、
-  建立 service account 並下載金鑰 JSON，把金鑰檔**路徑**設定在環境變數 `GB_GOOGLE_CREDENTIALS_FILE`；
-  老師把學習單共用給 service account 的 email（編輯者權限）。權限範圍只申請
-  `https://www.googleapis.com/auth/spreadsheets`。
-- **Rationale**: 本機專題不需要做 OAuth 登入畫面與 token 保存；金鑰只存在各自電腦，不進 repo（Constitution 原則 III）。
-  沒有權限時，錯誤訊息直接顯示 service account 的 email（不是機敏資料），告訴老師要共用給誰（FR-025）。
-- **Alternatives considered**: OAuth（老師用自己的帳號登入，需要登入流程、保存 refresh token，設定較複雜）；
+- **Decision**（2026-11-22 組內決議，取代原本的 service account）：使用 OAuth 的「已安裝應用程式」流程。
+  組員在自己的 Google Cloud 專案啟用 Sheets API，建立「桌面應用程式」類型的 OAuth client，下載 client 設定檔，
+  把**路徑**設定在 `GB_GOOGLE_OAUTH_CLIENT_FILE`。老師執行 `uv run python -m guided_buzz login-google`，
+  在瀏覽器以自己的 Google 帳號授權一次；系統把取得的 token（含 refresh token）與帳號 email 存到 `GB_GOOGLE_TOKEN_FILE`
+  （權限 600，預設位於已列入 `.gitignore` 的資料目錄）。伺服器啟動時讀取 token 檔，存取權杖過期時由 google-auth 自動更新。
+  權限範圍只申請 `https://www.googleapis.com/auth/spreadsheets`、`openid` 與 `https://www.googleapis.com/auth/userinfo.email`
+  （後兩者只用來在錯誤訊息中顯示目前登入的帳號）。
+- **Rationale**: 老師用自己的帳號，該帳號能編輯的試算表都能直接使用，不必把每份試算表共用給機器人 email，
+  比較符合實際課堂使用。client 設定檔與 token 只存在各自電腦，不進 repo（Constitution 原則 III）。
+  授權被撤銷或過期（同意畫面在「測試中」狀態時約 7 天）時，Google 回應 RefreshError，系統對應到
+  `GOOGLE_AUTH_EXPIRED` 並提示重新登入的指令。
+- **Alternatives considered**: service account（每份試算表都要共用給機器人 email，助教測試時也要；原先的做法）；
   API key（只能讀取公開試算表，無法寫入）。

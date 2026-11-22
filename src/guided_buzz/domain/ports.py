@@ -12,7 +12,7 @@ class ActivityResultsProvider(Protocol):
 
 
 class SheetsGateway(Protocol):
-    service_account_email: str
+    account_email: str  # 目前登入的 Google 帳號，用於錯誤訊息
 
     def fetch_grid(self, spreadsheet_id: str) -> SpreadsheetGrid: ...
 
