@@ -31,7 +31,7 @@ description: "Task list for 001 學習單匯入、答案寫回與結果匯出"
 - [X] T002 建立 pyproject.toml（套件名稱 guided-buzz，src 結構；相依套件：fastapi、uvicorn、pydantic>=2、google-api-python-client、google-auth、python-dotenv；開發用：pytest、httpx；設定 pytest 的 testpaths=tests）與 .python-version（內容為 3.12），並執行 `uv sync` 確認可以安裝
 - [X] T003 [P] 建立 .gitignore（.env、.venv/、var/、__pycache__/、*.pyc、.pytest_cache/、.secrets/、*service-account*.json、.DS_Store）與 .env.example，列出 research R10 的所有 GB_* 變數，只填佔位值與預設值說明（GB_TEACHER_PASSWORD=change-me、GB_GOOGLE_CREDENTIALS_FILE=/path/to/service-account.json）
 - [X] T004 [P] 依 plan.md 的 Source Code 結構建立 src/guided_buzz/ 下各子套件（domain、worksheet、sheets、export、results、storage、auth、api、web/static）與 tests/unit、tests/integration、tests/fixtures/sheets，並加入 __init__.py
-- [ ] T005 [P] 撰寫一次性手動腳本 scripts/capture_sheet_fixture.py：以 login-google 取得的 OAuth token 呼叫 spreadsheets.get（欄位同 research R3），把範例 A、B（spec.md「參考範例學習單」的兩個網址）的回應存成 tests/fixtures/sheets/sample_a.json 與 sample_b.json；執行後確認兩份都有「學習單」工作表，且檔案內不含任何憑證。此腳本不屬於自動化測試（腳本已完成，待完成 OAuth 設定後執行）
+- [X] T005 [P] 撰寫一次性手動腳本 scripts/capture_sheet_fixture.py：以 login-google 取得的 OAuth token 呼叫 spreadsheets.get（欄位同 research R3），把範例 A、B（spec.md「參考範例學習單」的兩個網址）的回應存成 tests/fixtures/sheets/sample_a.json 與 sample_b.json；執行後確認兩份都有「學習單」工作表，且檔案內不含任何憑證。此腳本不屬於自動化測試（2026-11-22 已以 OAuth 取得真實快照；原本依 spec 手動建構的快照已取代，並把測試中寫死的工作表 ID、試算表名稱改為從快照讀取）
 
 ---
 

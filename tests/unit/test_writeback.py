@@ -12,8 +12,11 @@ from tests.fakes import FakeSheetsGateway
 LABELS = ("題號", "題目", "作答")
 
 
+SAMPLE_B_SHEET_ID = FakeSheetsGateway().add_fixture("sample_b").sheets[0].sheet_id
+
+
 def ref(cell, title="學習單"):
-    return CellRef(0, title, cell)
+    return CellRef(SAMPLE_B_SHEET_ID, title, cell)
 
 
 def sample_b():

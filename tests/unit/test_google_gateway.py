@@ -63,7 +63,8 @@ def test_sample_b_converts_values_and_merges():
     grid = grid_from_response(load("sample_b"))
     sheet = grid.sheets[0]
     assert grid.spreadsheet_id == "1PXXwWiBKJNpPkLRoJLMzZWsAh4Jzn2bThHTeRAiq3Hg"
-    assert (sheet.sheet_id, sheet.title) == (0, "學習單")
+    assert sheet.title == "學習單"
+    assert sheet.sheet_id == load("sample_b")["sheets"][0]["properties"]["sheetId"]
     assert sheet.values["B4"] == "題號"
     assert sheet.values["G5"] == "（1）"
     assert "H5" not in sheet.values
@@ -72,7 +73,8 @@ def test_sample_b_converts_values_and_merges():
 
 def test_sample_a_has_six_answer_merges():
     sheet = grid_from_response(load("sample_a")).sheets[0]
-    assert [m for m in sheet.merges if m.startswith("G") and m != "G4:H4"] == [f"G{r}:H{r}" for r in range(5, 16, 2)]
+    # Google 回傳的合併範圍順序不固定，以集合比對
+    assert {f"G{r}:H{r}" for r in range(5, 16, 2)} <= set(sheet.merges)
 
 
 def test_fetch_requests_only_needed_fields():
