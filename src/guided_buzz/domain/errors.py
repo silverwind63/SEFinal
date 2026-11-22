@@ -33,7 +33,7 @@ MESSAGES = {
     ImportErrorCode.MULTIPLE_BLANKS_IN_ROW: "工作表「{sheet}」第 {row} 列有 {count} 個空白作答區，每個題目列只能有一個填空格。",
     ImportErrorCode.GROUP_RANGE_INCOMPLETE: "工作表「{sheet}」的題組（{cell}）範圍內第 {row} 列不是題目列，題組的每一列都必須是題目列。",
     ImportErrorCode.TOO_MANY_QUESTIONS: "題數 {count} 超過上限 {limit} 題。",
-    ImportErrorCode.STRUCTURE_CHANGED: "學習單在匯入後被修改，填空格位置與匯入時不同：{detail}。請重新匯入學習單。",
+    ImportErrorCode.STRUCTURE_CHANGED: "學習單的結構和匯入時不同（例如插入或刪除了列），無法確定答案該寫到哪一格。細節：{detail}。請重新匯入學習單後再寫回。",
 }
 
 
