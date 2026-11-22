@@ -7,10 +7,10 @@ package "guided_buzz" {
   component "api\n路由・輸入驗證・錯誤格式" as api
   component "auth\n老師登入・Token" as auth
   component "worksheet.parser\n純函式：SpreadsheetGrid → ParsedWorksheet" as parser
-  component "worksheet.writeback\n純函式：挑出要寫入的空白填空格" as writeback
-  component "sheets\nSheetsGateway・GoogleSheetsGateway" as sheets
+  component "worksheet.writeback\n純函式：挑出要寫入的空白填空格、檢查結構是否改變" as writeback
+  component "sheets\nurl・GoogleSheetsGateway" as sheets
   component "export.csv_export" as export
-  component "results\nJsonFileResultsProvider" as results
+  component "results\nJsonFileResultsProvider・mapping" as results
   component "storage\nSQLite" as storage
   component "config\n環境變數（含 Google 憑證路徑）" as config
   component "domain\n共用資料結構・介面" as domain
@@ -27,14 +27,12 @@ api --> storage
 sheets --> gapi : HTTPS
 parser --> domain
 writeback --> domain
+writeback --> parser
 sheets --> domain
 export --> domain
 results --> domain
 storage --> domain
 api --> domain
-api --> config
-auth --> config
-storage --> config
-sheets --> config
+api --> config : 啟動時讀取設定，再把需要的值傳給各模組
 buzz ..> domain : 實作 ActivityResultsProvider
 @enduml

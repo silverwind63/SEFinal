@@ -5,12 +5,14 @@ actor "老師" as T
 participant "API 層" as API
 participant "ActivityResultsProvider" as R
 participant "CSV 匯出" as E
+database "儲存" as S
 T -> API : GET /api/activities/{id}/results.csv
 API -> R : [權限檢查] get_result(id, 老師)（擁有者檢查）
 alt 活動未結束
   API --> T : 409 INVALID_STATE
 end
-API -> E : to_csv(ActivityResult)
+API -> S : [權限檢查] 讀取活動對應的學習單（擁有者檢查）
+API -> E : to_csv(ActivityResult, 題號清單)
 E -> E : 題組送出依填空拆列、依題號與順位排序、UTF-8 BOM
 E --> API : CSV 內容與筆數
 API --> T : 200 text/csv（X-Record-Count）

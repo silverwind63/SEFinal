@@ -1,0 +1,19 @@
+body { font-family: system-ui, "PingFang TC", "Microsoft JhengHei", sans-serif; margin: 0; color: #1f2933; background: #f5f7fa; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #243b53; color: #fff; }
+header h1 { font-size: 1.2rem; margin: 0; }
+main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+section { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
+label { display: block; margin-bottom: 4px; font-weight: 600; }
+input { width: 100%; max-width: 560px; padding: 8px; box-sizing: border-box; margin-bottom: 8px; }
+button { padding: 8px 16px; border: 0; border-radius: 4px; background: #2680c2; color: #fff; cursor: pointer; }
+button.secondary { background: #829ab1; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+th, td { border: 1px solid #d9e2ec; padding: 6px 8px; text-align: left; }
+th { background: #f0f4f8; }
+.actions { display: flex; gap: 8px; }
+.hint { color: #627d98; font-size: .9rem; }
+#message:empty { display: none; }
+#message { padding: 12px 16px; border-radius: 8px; margin-top: 16px; white-space: pre-line; }
+#message.ok { background: #e3f9e5; color: #05400a; }
+#message.error { background: #ffe3e3; color: #610404; }

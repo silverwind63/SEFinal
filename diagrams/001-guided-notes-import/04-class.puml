@@ -8,6 +8,7 @@ class CellRef {
 }
 class SpreadsheetGrid {
   +spreadsheet_id : str
+  +title : str
   +sheets : list<SheetGrid>
 }
 class SheetGrid {
@@ -36,6 +37,7 @@ class Worksheet {
   +id : UUID
   +owner : str
   +spreadsheet_id : str
+  +spreadsheet_title : str
   +structure_hash : str
   +status : WorksheetStatus
   +parsed : ParsedWorksheet

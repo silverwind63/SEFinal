@@ -1,0 +1,226 @@
+{
+  "spreadsheetId": "12uh5xhIx2wXFMy42KU8lN7rLFQ8GDugt9zfAFEvu-1E",
+  "properties": {
+    "title": "範例 A"
+  },
+  "sheets": [
+    {
+      "properties": {
+        "sheetId": 0,
+        "title": "學習單",
+        "index": 0
+      },
+      "merges": [
+        {
+          "sheetId": 0,
+          "startRowIndex": 1,
+          "endRowIndex": 2,
+          "startColumnIndex": 1,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 3,
+          "endRowIndex": 4,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 3,
+          "endRowIndex": 4,
+          "startColumnIndex": 6,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 4,
+          "endRowIndex": 5,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 4,
+          "endRowIndex": 5,
+          "startColumnIndex": 6,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 6,
+          "endRowIndex": 7,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 6,
+          "endRowIndex": 7,
+          "startColumnIndex": 6,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 8,
+          "endRowIndex": 9,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 8,
+          "endRowIndex": 9,
+          "startColumnIndex": 6,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 10,
+          "endRowIndex": 11,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 10,
+          "endRowIndex": 11,
+          "startColumnIndex": 6,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 12,
+          "endRowIndex": 13,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 12,
+          "endRowIndex": 13,
+          "startColumnIndex": 6,
+          "endColumnIndex": 8
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 14,
+          "endRowIndex": 15,
+          "startColumnIndex": 2,
+          "endColumnIndex": 6
+        },
+        {
+          "sheetId": 0,
+          "startRowIndex": 14,
+          "endRowIndex": 15,
+          "startColumnIndex": 6,
+          "endColumnIndex": 8
+        }
+      ],
+      "data": [
+        {
+          "rowData": [
+            {},
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "範例學習單 A（無題組）"
+                }
+              ]
+            },
+            {},
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "題號"
+                },
+                {
+                  "formattedValue": "題目"
+                },
+                {},
+                {},
+                {},
+                {
+                  "formattedValue": "作答"
+                }
+              ]
+            },
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "1"
+                },
+                {
+                  "formattedValue": "第 1 題的題目敘述"
+                }
+              ]
+            },
+            {},
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "2"
+                },
+                {
+                  "formattedValue": "第 2 題的題目敘述"
+                }
+              ]
+            },
+            {},
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "3"
+                },
+                {
+                  "formattedValue": "第 3 題的題目敘述"
+                }
+              ]
+            },
+            {},
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "4"
+                },
+                {
+                  "formattedValue": "第 4 題的題目敘述"
+                }
+              ]
+            },
+            {},
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "5"
+                },
+                {
+                  "formattedValue": "第 5 題的題目敘述"
+                }
+              ]
+            },
+            {},
+            {
+              "values": [
+                {},
+                {
+                  "formattedValue": "6"
+                },
+                {
+                  "formattedValue": "第 6 題的題目敘述"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

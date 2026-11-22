@@ -26,6 +26,7 @@ API -> P : 重新解析，比對題目列與填空格位置（FR-019）
 alt 結構與匯入時不同
   API --> T : 409 STRUCTURE_CHANGED（說明差異）
 end
+API -> API : success_answers：只取伺服器判定為 success 的答案
 API -> W : plan(成功答案, 目前內容)
 W -> W : [判定] 只挑原本空白的填空格；已有內容者跳過（FR-026）
 W --> API : 要寫入的 {儲存格: 答案}、未填題號、跳過題號
@@ -34,6 +35,7 @@ GW -> GAPI : values.batchUpdate（RAW，只含目標儲存格）
 alt 寫入失敗（權限被取消、無法連線）
   API --> T : 403／503 清楚錯誤訊息，可重試
 else 成功
+  API -> S : 記錄寫回紀錄（題號清單，不含答案）
   API --> T : 200 已填題號、未填題號、跳過（已有內容）題號
 end
 @enduml
