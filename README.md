@@ -11,14 +11,30 @@
 | 001 學習單匯入、答案寫回與結果匯出 | [specs/001-guided-notes-import](specs/001-guided-notes-import/) | 已實作 |
 | 002 線上分組搶答活動 | [specs/002-online-buzz-activity](specs/002-online-buzz-activity/) | 已實作（待人工驗證） |
 
-## 需求
+## 前置需求
 
 - macOS 或 Linux，已安裝 [`uv`](https://docs.astral.sh/uv/)（會自動準備 Python 3.12）
 - 匯入與寫回需要網路連線；自動化測試不需要
 - 一個 Google 帳號，用來建立 OAuth client（見下方）
 - 修改圖表時需要 Java 與 PlantUML（`brew install plantuml`）
 
-## 一次性設定：Google OAuth
+## 設定與啟動
+
+### 第一次設定
+
+每台電腦只需要做一次（Google 授權失效時，重新執行「2. 設定 Google OAuth」第 4 點的 `login-google`）。
+
+#### 1. 安裝套件與建立 `.env`
+
+```bash
+uv sync
+cp .env.example .env    # .env 已列入 .gitignore，不可提交
+```
+
+編輯 `.env`，至少設定 `GB_TEACHER_PASSWORD`（老師登入密碼）與 `GB_GOOGLE_OAUTH_CLIENT_FILE`（見下一步）。
+其他設定見[環境變數](#環境變數)。
+
+#### 2. 設定 Google OAuth
 
 系統以老師自己的 Google 帳號（OAuth）直接讀寫 Google Sheets。每位組員在自己的電腦各做一次。OAuth client 設定檔與登入後的 token 檔**不可**放進 repo，也不可透過聊天或雲端硬碟傳給別人。
 
@@ -26,7 +42,7 @@
 2. 設定「OAuth 同意畫面」：使用者類型選「外部」，並把要登入的 Google 帳號（組員、Demo 用帳號）加入「測試使用者」。
 3. 建立 OAuth client，應用程式類型選「**桌面應用程式**」，下載 client JSON，存放在 repo 以外的位置
    （例如 `~/.config/guided-buzz/oauth-client.json`）。
-4. 在 `.env` 設定 `GB_GOOGLE_OAUTH_CLIENT_FILE` 指向這個檔案，然後執行：
+4. 在 `.env` 設定 `GB_GOOGLE_OAUTH_CLIENT_FILE` 指向這個檔案，然後執行（第一次使用，或授權失效時）：
 
    ```bash
    uv run python -m guided_buzz login-google
@@ -39,17 +55,6 @@
 
 同意畫面在「測試中」狀態時，授權約 7 天後失效（依 Google 目前政策，以 Console 顯示為準）。
 **Demo 前請重新執行一次 `login-google`**；授權失效時，系統會在匯入或寫回時提示重新登入。
-
-## 設定與啟動
-
-### 第一次設定
-
-```bash
-cp .env.example .env    # .env 已列入 .gitignore，不可提交
-# 編輯 .env，至少設定 GB_TEACHER_PASSWORD 與 GB_GOOGLE_OAUTH_CLIENT_FILE
-uv sync
-uv run python -m guided_buzz login-google   # 第一次使用，或授權失效時
-```
 
 ### 啟動伺服器（每次上課前）
 
@@ -87,6 +92,30 @@ uv run python -m guided_buzz
 
 注意：重新啟動會讓所有已登入的視窗需要重新登入，而且**尚未結束的搶答活動會變成「已中斷」**，請在上課前或活動結束後再改。
 連續輸錯密碼 5 次會鎖定 5 分鐘（可用 `GB_LOGIN_MAX_FAILURES`、`GB_LOGIN_LOCK_SECONDS` 調整）。
+
+## 環境變數
+
+只列名稱與用途，實際值請放在 `.env`（範例見 [`.env.example`](.env.example)）。
+
+| 變數 | 必填 | 用途（預設值） |
+|------|------|----------------|
+| `GB_TEACHER_PASSWORD` | ✅ | 老師登入密碼 |
+| `GB_GOOGLE_OAUTH_CLIENT_FILE` | ✅ | OAuth client JSON（桌面應用程式）路徑 |
+| `GB_GOOGLE_TOKEN_FILE` | | `login-google` 儲存 token 的位置（`<GB_DATA_DIR>/google-token.json`） |
+| `GB_DATA_DIR` | | SQLite 資料庫目錄（`./var`） |
+| `GB_HOST`、`GB_PORT` | | 監聽位址與連接埠（`127.0.0.1`、`8000`） |
+| `GB_SHEETS_TIMEOUT_SECONDS` | | Sheets API 逾時秒數（10） |
+| `GB_MAX_QUESTIONS` | | 每份學習單的題數上限（500） |
+| `GB_HEADER_LABEL_NUMBER`、`GB_HEADER_LABEL_QUESTION`、`GB_HEADER_LABEL_ANSWER` | | 表頭標籤（題號、題目、作答） |
+| `GB_TOKEN_TTL_SECONDS` | | 老師 Token 有效秒數（28800） |
+| `GB_LOGIN_MAX_FAILURES`、`GB_LOGIN_LOCK_SECONDS` | | 連續登入失敗上限與鎖定秒數（5、300） |
+| `GB_RESULTS_DIR` | | 搶答結果 JSON 檔目錄，只供測試與驗證；設定後寫回與匯出改讀 JSON 檔（未設定時讀取搶答活動保存的結果） |
+| `GB_MAX_TEAMS`、`GB_TEAM_NAME_MAX` | | 組數上限、組名長度上限（20、20） |
+| `GB_MAX_ANSWER_LENGTH` | | 答案長度上限（200） |
+| `GB_FAIRNESS_ENABLED`、`GB_COOLDOWN_SECONDS`、`GB_COOLDOWN_LEAD` | | 公平機制預設值：是否啟用、冷卻秒數 N、領先門檻 K（true、10、2）；建立活動時可覆寫 |
+| `GB_JOIN_MAX_FAILURES`、`GB_JOIN_LOCK_SECONDS` | | 每個視窗輸錯組別代碼的上限與鎖定秒數（5、60） |
+| `GB_JOIN_GLOBAL_FAILURES_PER_MIN` | | 全體每分鐘輸錯上限（60） |
+| `GB_WS_AUTH_TIMEOUT_SECONDS` | | WebSocket 連線後必須送出驗證訊息的秒數（5） |
 
 ## 老師操作說明
 
@@ -144,30 +173,6 @@ uv run python -m guided_buzz
 5. 如果畫面顯示「冷卻中，N 秒後才能再送出」，代表本組領先太多，等倒數結束再送。
 6. 老師按「結束搶答」後，畫面下方會顯示每題的成功組別與答案，以及各組成功題數。
 7. 如果出現「組別身分已失效」或「活動已中斷」，請向老師取得代碼後重新加入。
-
-### 環境變數
-
-只列名稱與用途，實際值請放在 `.env`（範例見 [`.env.example`](.env.example)）。
-
-| 變數 | 必填 | 用途（預設值） |
-|------|------|----------------|
-| `GB_TEACHER_PASSWORD` | ✅ | 老師登入密碼 |
-| `GB_GOOGLE_OAUTH_CLIENT_FILE` | ✅ | OAuth client JSON（桌面應用程式）路徑 |
-| `GB_GOOGLE_TOKEN_FILE` | | `login-google` 儲存 token 的位置（`<GB_DATA_DIR>/google-token.json`） |
-| `GB_DATA_DIR` | | SQLite 資料庫目錄（`./var`） |
-| `GB_HOST`、`GB_PORT` | | 監聽位址與連接埠（`127.0.0.1`、`8000`） |
-| `GB_SHEETS_TIMEOUT_SECONDS` | | Sheets API 逾時秒數（10） |
-| `GB_MAX_QUESTIONS` | | 每份學習單的題數上限（500） |
-| `GB_HEADER_LABEL_NUMBER`、`GB_HEADER_LABEL_QUESTION`、`GB_HEADER_LABEL_ANSWER` | | 表頭標籤（題號、題目、作答） |
-| `GB_TOKEN_TTL_SECONDS` | | 老師 Token 有效秒數（28800） |
-| `GB_LOGIN_MAX_FAILURES`、`GB_LOGIN_LOCK_SECONDS` | | 連續登入失敗上限與鎖定秒數（5、300） |
-| `GB_RESULTS_DIR` | | 搶答結果 JSON 檔目錄，只供測試與驗證；設定後寫回與匯出改讀 JSON 檔（未設定時讀取搶答活動保存的結果） |
-| `GB_MAX_TEAMS`、`GB_TEAM_NAME_MAX` | | 組數上限、組名長度上限（20、20） |
-| `GB_MAX_ANSWER_LENGTH` | | 答案長度上限（200） |
-| `GB_FAIRNESS_ENABLED`、`GB_COOLDOWN_SECONDS`、`GB_COOLDOWN_LEAD` | | 公平機制預設值：是否啟用、冷卻秒數 N、領先門檻 K（true、10、2）；建立活動時可覆寫 |
-| `GB_JOIN_MAX_FAILURES`、`GB_JOIN_LOCK_SECONDS` | | 每個視窗輸錯組別代碼的上限與鎖定秒數（5、60） |
-| `GB_JOIN_GLOBAL_FAILURES_PER_MIN` | | 全體每分鐘輸錯上限（60） |
-| `GB_WS_AUTH_TIMEOUT_SECONDS` | | WebSocket 連線後必須送出驗證訊息的秒數（5） |
 
 ## 學習單格式規則
 
