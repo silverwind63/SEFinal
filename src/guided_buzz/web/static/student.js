@@ -75,7 +75,7 @@ function render(v) {
       const label = document.createElement("label");
       label.textContent = `第 ${no} 題`;
       const input = document.createElement("input");
-      input.name = String(no);
+      input.name = `q${no}`;
       input.maxLength = 1000;
       input.disabled = Boolean(done) || v.phase !== "running";
       if (done) input.value = done.answers[String(no)] ?? "";
@@ -116,7 +116,7 @@ function render(v) {
 
 async function send(unit, form) {
   const answers = {};
-  for (const no of unit.question_nos) answers[String(no)] = form.elements[String(no)].value;
+  for (const no of unit.question_nos) answers[String(no)] = form.querySelector(`input[name="q${no}"]`).value;
   const res = await api("/api/submissions", { method: "POST", body: JSON.stringify({ unit_key: unit.key, answers }) });
   const body = await readJson(res);
   if (res.status === 401) return leave(formatError(body));
@@ -166,6 +166,7 @@ $("join-form").addEventListener("submit", async (e) => {
   sessionStorage.setItem(ACTIVITY_KEY, body.activity_id);
   $("code").value = "";
   showMessage(`已加入「${body.team.name}」。`);
+  await refresh();
   connect();
 });
 
