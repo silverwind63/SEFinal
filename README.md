@@ -9,7 +9,7 @@
 | 功能 | 規格 | 狀態 |
 |------|------|------|
 | 001 學習單匯入、答案寫回與結果匯出 | [specs/001-guided-notes-import](specs/001-guided-notes-import/) | 已實作 |
-| 002 線上分組搶答活動 | [specs/002-online-buzz-activity](specs/002-online-buzz-activity/) | 已實作（待人工驗證） |
+| 002 線上分組搶答活動 | [specs/002-online-buzz-activity](specs/002-online-buzz-activity/) | 已實作 |
 
 ## 前置需求
 

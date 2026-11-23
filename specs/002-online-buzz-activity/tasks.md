@@ -183,7 +183,7 @@ description: "Task list for 002 線上分組搶答活動"
 - [x] T061 [P] 擴充 001 的 tests/integration/test_no_secrets.py：完成一場搶答活動後，caplog 中不含任何組別代碼、學生 Token、老師 Token 與答案字串
 - [x] T062 [P] 更新 README.md：加入搶答活動的操作流程、新增的環境變數名稱與用途、固定 workers=1 的原因、以多個視窗模擬的方法
 - [x] T063 對照實作更新 diagrams/002-online-buzz-activity/ 的 .puml 並重新產生 PNG，確認 9 張圖與最終程式碼一致（Constitution 原則 VII 實作階段驗證）
-- [ ] T064 （自動化測試已通過；quickstart V1–V7 人工驗證待執行）執行 `uv run pytest -v` 與 quickstart.md 的 V1–V7 人工驗證，並回報測試指令、通過與失敗數、失敗輸出及人工驗證結果（Constitution 原則 VI）
+- [x] T064 （紀錄見 verification.md）執行 `uv run pytest -v` 與 quickstart.md 的 V1–V7 人工驗證，並回報測試指令、通過與失敗數、失敗輸出及人工驗證結果（Constitution 原則 VI）
 
 ---
 
