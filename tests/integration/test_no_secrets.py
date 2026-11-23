@@ -44,3 +44,27 @@ def test_source_and_fixtures_have_no_hardcoded_secrets_or_paths():
         assert "private_key" not in text and "PRIVATE KEY" not in text, path
         assert not re.search(r'"(refresh_token|client_secret)"\s*:\s*"[^"]+"', text), path
         assert not re.search(r"(?i)password\s*=\s*['\"][^'\"]+['\"]", text), path
+
+
+def test_buzz_activity_logs_no_codes_tokens_or_answers(client, sheets, caplog):
+    """完成一場搶答活動後，log 中不含組別代碼、學生 Token、老師 Token 與答案（002 tasks T061）。"""
+    from tests.buzz import started, submit
+
+    caplog.set_level(logging.DEBUG)
+    token = client.post("/api/auth/teacher-login", json={"password": PASSWORD}).json()["token"]
+    auth = {"Authorization": f"Bearer {token}"}
+    activity, students = started(client, auth, sheets)
+    aid = activity["id"]
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "auth", "token": students[0]["Authorization"].split()[1]})
+        ws.receive_json()
+    submit(client, students[0], "Q6", {6: SECRET_ANSWER})
+    submit(client, students[1], "Q6", {6: SECRET_ANSWER + "2"})
+    client.post("/api/join", json={"code": "ZZZZZZ"}, headers={"X-Window-Id": "w"})
+    client.post(f"/api/activities/{aid}/teams/2/regenerate-code", headers=auth)
+    client.post(f"/api/activities/{aid}/units/Q6/invalidate", headers=auth)
+    client.post(f"/api/activities/{aid}/end", headers=auth)
+    secrets = [token, SECRET_ANSWER, *(t["code"] for t in activity["teams"]), *(s["Authorization"].split()[1] for s in students)]
+    for secret in secrets:
+        assert secret not in caplog.text
+    assert "已結束" in caplog.text  # 確認 log 確實有被收集

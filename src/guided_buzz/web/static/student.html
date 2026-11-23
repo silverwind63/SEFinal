@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>課堂搶答系統｜學生</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header><h1>課堂搶答系統｜學生</h1><span id="team-name"></span></header>
+  <main>
+    <section id="join-section">
+      <h2>加入組別</h2>
+      <form id="join-form">
+        <label for="code">組別代碼（老師提供的 6 碼）</label>
+        <input id="code" type="text" autocomplete="off" required maxlength="32">
+        <button type="submit">加入</button>
+      </form>
+    </section>
+
+    <div id="app" hidden>
+      <section>
+        <h2>目前階段：<span id="phase"></span></h2>
+        <p id="cooldown" class="hint" hidden></p>
+        <p class="hint">題目請對照手上的學習單；每組每題只能送出一次，題組要一次填完所有題目。</p>
+      </section>
+      <section id="units-section">
+        <h2>作答</h2>
+        <div id="units"></div>
+      </section>
+      <section id="results-section" hidden>
+        <h2>搶答結果</h2>
+        <table>
+          <thead><tr><th>搶答單位</th><th>成功組別</th><th>答案</th></tr></thead>
+          <tbody id="result-rows"></tbody>
+        </table>
+        <h3>各組成功題數</h3>
+        <ul id="team-wins"></ul>
+      </section>
+    </div>
+
+    <div id="message" role="status" aria-live="polite"></div>
+  </main>
+  <script src="/student.js"></script>
+</body>
+</html>

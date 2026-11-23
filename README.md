@@ -9,7 +9,7 @@
 | 功能 | 規格 | 狀態 |
 |------|------|------|
 | 001 學習單匯入、答案寫回與結果匯出 | [specs/001-guided-notes-import](specs/001-guided-notes-import/) | 已實作 |
-| 002 線上分組搶答活動 | [specs/002-online-buzz-activity](specs/002-online-buzz-activity/) | 尚未實作 |
+| 002 線上分組搶答活動 | [specs/002-online-buzz-activity](specs/002-online-buzz-activity/) | 已實作（待人工驗證） |
 
 ## 需求
 
@@ -52,6 +52,22 @@ uv run python -m guided_buzz
 
 開啟 http://127.0.0.1:8000 ，以老師密碼登入。缺少必要環境變數或尚未登入 Google 時，伺服器會拒絕啟動並說明原因。
 
+伺服器固定只執行一個程序（uvicorn `workers=1`）：搶答活動的狀態與判定用的鎖都在記憶體中，多個程序會各自判定而失去一致性。
+
+### 進行一場搶答活動（002）
+
+本專題只在單一電腦上運作，以同一個瀏覽器的多個**視窗或分頁**分別扮演老師與各組學生；每個視窗的身分各自獨立。
+
+1. 老師視窗：在首頁匯入並確認學習單，再開啟「搶答主控台」（`/teacher.html`），選擇學習單、輸入組名（每行一組）後建立活動。
+2. 主控台會顯示每組的組別代碼，請私下告訴各組。
+3. 學生視窗：開啟 `/student.html`，輸入組別代碼加入。同一組可以有多個視窗。
+4. 老師按「開始搶答」：所有題目同時開放，最先送出的組別搶答成功；題組要一次送出全部答案。
+   領先其他組 K 題以上的組別，每次成功後冷卻 N 秒。
+5. 老師可在主控台即時看到所有送出與順位，並可把成功答案「判定無效」，由下一順位遞補。
+6. 老師按「結束搶答」：結果寫入資料庫，學生畫面顯示結果。回到首頁，從「已結束的活動」選單選擇這場活動，即可寫回學習單或匯出 CSV。
+
+伺服器重新啟動時，尚未結束的活動會標示為「已中斷」，需要重新建立；已結束的活動結果會保留。
+
 ### 環境變數
 
 只列名稱與用途，實際值請放在 `.env`（範例見 [`.env.example`](.env.example)）。
@@ -68,7 +84,13 @@ uv run python -m guided_buzz
 | `GB_HEADER_LABEL_NUMBER`、`GB_HEADER_LABEL_QUESTION`、`GB_HEADER_LABEL_ANSWER` | | 表頭標籤（題號、題目、作答） |
 | `GB_TOKEN_TTL_SECONDS` | | 老師 Token 有效秒數（28800） |
 | `GB_LOGIN_MAX_FAILURES`、`GB_LOGIN_LOCK_SECONDS` | | 連續登入失敗上限與鎖定秒數（5、300） |
-| `GB_RESULTS_DIR` | | 搶答結果 JSON 檔目錄；002 完成前用來驗證寫回與匯出（未設定則停用） |
+| `GB_RESULTS_DIR` | | 搶答結果 JSON 檔目錄，只供測試與驗證；設定後寫回與匯出改讀 JSON 檔（未設定時讀取搶答活動保存的結果） |
+| `GB_MAX_TEAMS`、`GB_TEAM_NAME_MAX` | | 組數上限、組名長度上限（20、20） |
+| `GB_MAX_ANSWER_LENGTH` | | 答案長度上限（200） |
+| `GB_FAIRNESS_ENABLED`、`GB_COOLDOWN_SECONDS`、`GB_COOLDOWN_LEAD` | | 公平機制預設值：是否啟用、冷卻秒數 N、領先門檻 K（true、10、2）；建立活動時可覆寫 |
+| `GB_JOIN_MAX_FAILURES`、`GB_JOIN_LOCK_SECONDS` | | 每個視窗輸錯組別代碼的上限與鎖定秒數（5、60） |
+| `GB_JOIN_GLOBAL_FAILURES_PER_MIN` | | 全體每分鐘輸錯上限（60） |
+| `GB_WS_AUTH_TIMEOUT_SECONDS` | | WebSocket 連線後必須送出驗證訊息的秒數（5） |
 
 ## 學習單格式規則
 
@@ -92,7 +114,8 @@ CI 通過後才 merge 進 `main`。
 
 自動化測試一律使用 `FakeSheetsGateway` 取代 Google 服務，不連網。`tests/fixtures/sheets/` 是兩份範例學習單的
 真實 Sheets API 回應快照（取得方式見該目錄的 README）。
-需要實際連線 Google 的流程，請照 [quickstart](specs/001-guided-notes-import/quickstart.md) 的 V1–V8 人工驗證。
+需要實際連線 Google 的流程，請照 [001 quickstart](specs/001-guided-notes-import/quickstart.md) 的 V1–V8 人工驗證；
+搶答活動請照 [002 quickstart](specs/002-online-buzz-activity/quickstart.md) 的 V1–V7 以多個瀏覽器視窗驗證。
 
 ## 圖表
 

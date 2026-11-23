@@ -70,3 +70,39 @@ def test_invalid_values_fail_with_variable_name(key_file, overrides, expected):
 
 def test_password_not_in_repr(key_file):
     assert "pw-123456" not in repr(load_settings(env(key_file)))
+
+
+# ---- 002 搶答活動設定（tasks T004） ----
+
+
+def test_buzz_defaults(key_file):
+    s = load_settings(env(key_file))
+    assert (s.max_teams, s.team_name_max, s.max_answer_length) == (20, 20, 200)
+    assert s.fairness_enabled is True
+    assert (s.cooldown_seconds, s.cooldown_lead) == (10, 2)
+    assert (s.join_max_failures, s.join_lock_seconds, s.join_global_failures_per_min) == (5, 60, 60)
+    assert s.ws_auth_timeout_seconds == 5
+
+
+def test_buzz_overrides(key_file):
+    s = load_settings(env(key_file, GB_FAIRNESS_ENABLED="false", GB_COOLDOWN_SECONDS="600", GB_COOLDOWN_LEAD="100", GB_MAX_TEAMS="1"))
+    assert s.fairness_enabled is False
+    assert (s.cooldown_seconds, s.cooldown_lead, s.max_teams) == (600, 100, 1)
+
+
+@pytest.mark.parametrize(
+    "name,value,expected",
+    [
+        ("GB_COOLDOWN_SECONDS", "0", "GB_COOLDOWN_SECONDS 超出範圍"),
+        ("GB_COOLDOWN_SECONDS", "601", "GB_COOLDOWN_SECONDS 超出範圍"),
+        ("GB_COOLDOWN_LEAD", "101", "GB_COOLDOWN_LEAD 超出範圍"),
+        ("GB_MAX_TEAMS", "0", "GB_MAX_TEAMS 超出範圍"),
+        ("GB_TEAM_NAME_MAX", "0", "GB_TEAM_NAME_MAX 超出範圍"),
+        ("GB_MAX_ANSWER_LENGTH", "abc", "GB_MAX_ANSWER_LENGTH 必須是數字"),
+        ("GB_FAIRNESS_ENABLED", "maybe", "GB_FAIRNESS_ENABLED 必須是 true 或 false"),
+    ],
+)
+def test_buzz_invalid(key_file, name, value, expected):
+    with pytest.raises(ConfigError) as e:
+        load_settings(env(key_file, **{name: value}))
+    assert expected in str(e.value)

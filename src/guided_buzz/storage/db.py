@@ -41,6 +41,50 @@ CREATE TABLE IF NOT EXISTS writebacks (
     skipped_non_empty TEXT NOT NULL,
     created_at TEXT NOT NULL
 );
+-- 002 搶答活動（specs/002-online-buzz-activity/data-model.md）
+CREATE TABLE IF NOT EXISTS activities (
+    id TEXT PRIMARY KEY,
+    worksheet_id TEXT NOT NULL REFERENCES worksheets(id),
+    owner TEXT NOT NULL,
+    phase TEXT NOT NULL,
+    fairness_enabled INTEGER NOT NULL,
+    cooldown_seconds INTEGER NOT NULL,
+    cooldown_lead INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    started_at TEXT,
+    ended_at TEXT
+);
+CREATE TABLE IF NOT EXISTS teams (
+    activity_id TEXT NOT NULL REFERENCES activities(id),
+    team_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    code_hash TEXT NOT NULL,
+    code_version INTEGER NOT NULL,
+    PRIMARY KEY (activity_id, team_id),
+    UNIQUE (activity_id, name)
+);
+CREATE TABLE IF NOT EXISTS submissions (
+    activity_id TEXT NOT NULL REFERENCES activities(id),
+    id INTEGER NOT NULL,
+    unit_key TEXT NOT NULL,
+    team_id INTEGER NOT NULL,
+    rank INTEGER NOT NULL,
+    outcome TEXT NOT NULL,
+    received_at TEXT NOT NULL,
+    invalidated_at TEXT,
+    PRIMARY KEY (activity_id, id),
+    UNIQUE (activity_id, unit_key, team_id),
+    UNIQUE (activity_id, unit_key, rank),
+    FOREIGN KEY (activity_id, team_id) REFERENCES teams(activity_id, team_id)
+);
+CREATE TABLE IF NOT EXISTS submission_answers (
+    activity_id TEXT NOT NULL,
+    submission_id INTEGER NOT NULL,
+    question_no INTEGER NOT NULL,
+    answer TEXT NOT NULL,
+    PRIMARY KEY (activity_id, submission_id, question_no),
+    FOREIGN KEY (activity_id, submission_id) REFERENCES submissions(activity_id, id)
+);
 """
 
 

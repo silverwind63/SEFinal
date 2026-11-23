@@ -146,3 +146,33 @@ class WritebackResult:
     filled: tuple[int, ...]
     unfilled: tuple[int, ...]
     skipped_non_empty: tuple[int, ...]
+
+
+# ---- 002 搶答活動（specs/002-online-buzz-activity/data-model.md） ----
+
+UNIT_KEY_RE = re.compile(r"^[GQ][1-9][0-9]*$")
+
+
+class ActivityPhase(str, Enum):
+    PREPARING = "preparing"
+    RUNNING = "running"
+    ENDED = "ended"
+    INTERRUPTED = "interrupted"
+
+
+@dataclass(frozen=True)
+class BuzzUnit:
+    """搶答單位：題組（G<group_no>）或不屬於題組的單一題目（Q<question_no>）。"""
+
+    key: str
+    question_nos: tuple[int, ...]
+    display: str
+
+    def __post_init__(self):
+        _require(bool(UNIT_KEY_RE.match(self.key)), f"搶答單位鍵值格式不正確：{self.key}")
+        _require(bool(self.question_nos), "搶答單位至少要有一個題號")
+        _require(list(self.question_nos) == sorted(set(self.question_nos)), "搶答單位的題號必須遞增且不重複")
+        if self.key.startswith("Q"):
+            _require(self.question_nos == (int(self.key[1:]),), "單一題目的鍵值必須等於它的題號")
+        else:
+            _require(len(self.question_nos) >= 2, "題組至少要有 2 題")

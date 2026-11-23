@@ -31,7 +31,8 @@ def main() -> None:
     except GoogleAuthError as e:
         sys.exit(str(e))
     gateway = GoogleSheetsGateway(creds, settings.sheets_timeout_seconds, account_email=email)
-    uvicorn.run(create_app(settings, gateway), host=settings.host, port=settings.port)
+    # 搶答活動的狀態與判定鎖都在記憶體中（002 research R1），只能有一個程序，因此固定 workers=1。
+    uvicorn.run(create_app(settings, gateway), host=settings.host, port=settings.port, workers=1)
 
 
 if __name__ == "__main__":

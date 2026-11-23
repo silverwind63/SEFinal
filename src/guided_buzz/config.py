@@ -29,6 +29,17 @@ class Settings:
     login_max_failures: int
     login_lock_seconds: int
     results_dir: Path | None
+    # 002 搶答活動（research R10）
+    max_teams: int
+    team_name_max: int
+    max_answer_length: int
+    fairness_enabled: bool
+    cooldown_seconds: int
+    cooldown_lead: int
+    join_max_failures: int
+    join_lock_seconds: int
+    join_global_failures_per_min: int
+    ws_auth_timeout_seconds: float
 
 
 def load_settings(env: Mapping[str, str] | None = None) -> Settings:
@@ -57,6 +68,15 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
             problems.append(f"{name} 超出範圍（{limit}）")
         return value
 
+    def flag(name: str, default: str) -> bool:
+        raw = env.get(name, default).strip().lower()
+        if raw in ("true", "1", "yes", "on"):
+            return True
+        if raw in ("false", "0", "no", "off"):
+            return False
+        problems.append(f"{name} 必須是 true 或 false")
+        return default == "true"
+
     password = text("GB_TEACHER_PASSWORD", required=True)
     client_file = text("GB_GOOGLE_OAUTH_CLIENT_FILE", required=True)
     if client_file and not Path(client_file).is_file():
@@ -83,6 +103,16 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         login_max_failures=number("GB_LOGIN_MAX_FAILURES", "5"),
         login_lock_seconds=number("GB_LOGIN_LOCK_SECONDS", "300"),
         results_dir=Path(results_dir) if results_dir else None,
+        max_teams=number("GB_MAX_TEAMS", "20"),
+        team_name_max=number("GB_TEAM_NAME_MAX", "20"),
+        max_answer_length=number("GB_MAX_ANSWER_LENGTH", "200"),
+        fairness_enabled=flag("GB_FAIRNESS_ENABLED", "true"),
+        cooldown_seconds=number("GB_COOLDOWN_SECONDS", "10", high=600),
+        cooldown_lead=number("GB_COOLDOWN_LEAD", "2", high=100),
+        join_max_failures=number("GB_JOIN_MAX_FAILURES", "5"),
+        join_lock_seconds=number("GB_JOIN_LOCK_SECONDS", "60"),
+        join_global_failures_per_min=number("GB_JOIN_GLOBAL_FAILURES_PER_MIN", "60"),
+        ws_auth_timeout_seconds=number("GB_WS_AUTH_TIMEOUT_SECONDS", "5", cast=float, low=0.1, high=60),
     )
     if problems:
         raise ConfigError("設定錯誤，伺服器無法啟動：\n- " + "\n- ".join(problems))

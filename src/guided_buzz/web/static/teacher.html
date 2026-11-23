@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>課堂搶答系統｜搶答主控台</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header><h1>課堂搶答系統｜搶答主控台</h1><nav><a href="/">學習單與結果</a> <button id="logout" hidden>登出</button></nav></header>
+  <main>
+    <section id="login-section">
+      <h2>老師登入</h2>
+      <form id="login-form">
+        <label for="password">密碼</label>
+        <input id="password" type="password" autocomplete="current-password" required maxlength="128">
+        <button type="submit">登入</button>
+      </form>
+    </section>
+
+    <div id="app" hidden>
+      <section id="create-section">
+        <h2>建立搶答活動</h2>
+        <form id="create-form">
+          <label for="worksheet">學習單（只列出已確認的）</label>
+          <select id="worksheet" required></select>
+          <label for="teams">組別（每行一組）</label>
+          <textarea id="teams" rows="4" required>第一組
+第二組
+第三組</textarea>
+          <fieldset>
+            <legend>公平機制（留空使用系統預設值）</legend>
+            <label><input id="fairness" type="checkbox" checked> 啟用：領先 K 題就冷卻 N 秒</label>
+            <label for="cooldown-seconds">冷卻秒數 N（1–600）</label>
+            <input id="cooldown-seconds" type="number" min="1" max="600">
+            <label for="cooldown-lead">領先門檻 K（1–100）</label>
+            <input id="cooldown-lead" type="number" min="1" max="100">
+          </fieldset>
+          <button type="submit">建立活動</button>
+        </form>
+      </section>
+
+      <section id="activity-section" hidden>
+        <h2>目前活動：<span id="phase"></span></h2>
+        <p class="hint" id="activity-meta"></p>
+        <div class="actions">
+          <button id="start-btn">開始搶答</button>
+          <button id="end-btn" class="secondary">結束搶答</button>
+        </div>
+        <h3>組別</h3>
+        <table>
+          <thead><tr><th>組別</th><th>組別代碼</th><th>成功題數</th><th>冷卻</th><th></th></tr></thead>
+          <tbody id="team-rows"></tbody>
+        </table>
+        <h3>作答狀況</h3>
+        <table>
+          <thead><tr><th>搶答單位</th><th>狀態</th><th>送出（順位．組別．答案．結果）</th></tr></thead>
+          <tbody id="unit-rows"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <div id="message" role="status" aria-live="polite"></div>
+  </main>
+  <script src="/teacher.js"></script>
+</body>
+</html>

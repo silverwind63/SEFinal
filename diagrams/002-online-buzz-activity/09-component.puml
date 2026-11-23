@@ -5,6 +5,7 @@ component "web/static\n老師頁面・學生頁面" as web
 package "guided_buzz" {
   component "api\nactivity_routes・student_routes" as api
   component "realtime\n連線管理・依身分產生推播" as realtime
+  component "activity.registry\n目前活動・載入已結束活動" as registry
   component "activity.engine\n判定（純邏輯＋鎖）" as engine
   component "activity.fairness" as fairness
   component "activity.units\nParsedWorksheet→BuzzUnit" as units
@@ -18,16 +19,17 @@ package "guided_buzz" {
 component "001 寫回／匯出" as f001
 web --> api : HTTP
 web --> realtime : WebSocket
+api --> registry
 api --> engine
 api --> sessions
-api --> astore
-api --> wstore
-api --> units
+registry --> engine
+registry --> units
+registry --> astore
+registry --> wstore
 realtime --> sessions
-realtime --> engine
+realtime --> registry
 engine --> fairness
-engine --> units
-engine --> astore
+engine ..> astore : ActivityRepository（注入）
 engine --> domain
 provider --> astore
 provider --> domain

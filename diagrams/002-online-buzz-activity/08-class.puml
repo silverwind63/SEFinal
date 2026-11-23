@@ -41,8 +41,15 @@ class ActivityEngine {
   +submit(team_id, unit_key, answers) : SubmitResult
   +invalidate(unit_key) : InvalidateResult
   +end()
+  +regenerate_code(team_id) : str
   +view_for_teacher()
   +view_for_team(team_id)
+  +results_view(include_all)
+}
+class ActivityRegistry {
+  +create(owner, worksheet_id, teams, ...) : ActivityEngine
+  +get(activity_id, owner) : ActivityEngine
+  +current : ActivityEngine
 }
 interface ActivityResultsProvider
 class SqliteActivityResultsProvider {
@@ -56,6 +63,7 @@ Submission --> BuzzUnit
 Cooldown --> Team
 Cooldown --> Submission : trigger
 ActivityEngine --> Activity : 管理
+ActivityRegistry "1" o-- "0..*" ActivityEngine
 SqliteActivityResultsProvider ..|> ActivityResultsProvider
 note right of BuzzUnit
   由 001 的 ParsedWorksheet 產生

@@ -125,3 +125,86 @@ class SheetsUnavailable(ImportFailed):
 class GoogleAuthExpired(ImportFailed):
     def __init__(self):
         super().__init__([issue(ImportErrorCode.GOOGLE_AUTH_EXPIRED)])
+
+
+# ---- 002 搶答活動（specs/002-online-buzz-activity/contracts/http-api.md） ----
+
+
+class SubmissionRejectCode(str, Enum):
+    NOT_RUNNING = "NOT_RUNNING"
+    UNAUTHORIZED = "UNAUTHORIZED"
+    COOLDOWN = "COOLDOWN"
+    UNKNOWN_UNIT = "UNKNOWN_UNIT"
+    INCOMPLETE_GROUP = "INCOMPLETE_GROUP"
+    INVALID_ANSWER = "INVALID_ANSWER"
+    ALREADY_SUBMITTED = "ALREADY_SUBMITTED"
+
+
+REJECT_MESSAGES = {
+    SubmissionRejectCode.NOT_RUNNING: "目前不在搶答時間。",
+    SubmissionRejectCode.UNAUTHORIZED: "組別身分已失效（代碼可能已重新產生），請重新輸入組別代碼。",
+    SubmissionRejectCode.COOLDOWN: "本組領先其他組別，冷卻中，請在 {seconds} 秒後再送出。",
+    SubmissionRejectCode.UNKNOWN_UNIT: "找不到這個搶答單位。",
+    SubmissionRejectCode.INCOMPLETE_GROUP: "題組必須一次送出全部題目的答案。{detail}",
+    SubmissionRejectCode.INVALID_ANSWER: "第 {question_no} 題的答案{reason}。",
+    SubmissionRejectCode.ALREADY_SUBMITTED: "本組已作答此題。",
+}
+
+
+class DomainErrorWithExtra(DomainError):
+    """錯誤回應中除了 code、message 以外，還要附帶的欄位（例如剩餘秒數、缺少的題號）。"""
+
+    extra: dict = {}
+
+
+class SubmissionRejected(DomainErrorWithExtra):
+    def __init__(self, code: SubmissionRejectCode, **params):
+        self.code = code.value
+        self.reject_code = code
+        self.extra = {}
+        if code is SubmissionRejectCode.COOLDOWN:
+            self.extra["retry_after_seconds"] = params["seconds"]
+        if code is SubmissionRejectCode.INCOMPLETE_GROUP:
+            self.extra["missing"] = params.get("missing", [])
+            self.extra["unexpected"] = params.get("unexpected", [])
+            parts = []
+            if self.extra["missing"]:
+                parts.append("缺少第 " + "、".join(map(str, self.extra["missing"])) + " 題")
+            if self.extra["unexpected"]:
+                parts.append("第 " + "、".join(map(str, self.extra["unexpected"])) + " 題不屬於這個單位")
+            params["detail"] = "；".join(parts) + "。" if parts else ""
+        if code is SubmissionRejectCode.INVALID_ANSWER:
+            self.extra["question_no"] = params["question_no"]
+        super().__init__(REJECT_MESSAGES[code].format(**params))
+
+
+class ActivityInProgress(DomainError):
+    code = "ACTIVITY_IN_PROGRESS"
+    default_message = "已有一場準備中或搶答中的活動，請先結束它再建立新活動。"
+
+
+class InvalidCode(DomainError):
+    code = "INVALID_CODE"
+    default_message = "組別代碼錯誤。"
+
+
+class TooManyAttempts(DomainErrorWithExtra):
+    code = "TOO_MANY_ATTEMPTS"
+
+    def __init__(self, remaining_seconds: int):
+        self.extra = {"retry_after_seconds": remaining_seconds}
+        super().__init__(f"嘗試次數過多，請在 {remaining_seconds} 秒後再試。")
+
+
+class NotEnded(DomainError):
+    code = "NOT_ENDED"
+    default_message = "活動尚未結束，結束後才能檢視結果。"
+
+
+class PersistFailed(DomainError):
+    code = "PERSIST_FAILED"
+    default_message = "結果保存失敗，活動仍在進行中，請再試一次。"
+
+
+class InvalidInput(DomainError):
+    code = "VALIDATION_ERROR"

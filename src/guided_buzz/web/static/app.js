@@ -39,6 +39,20 @@ function showLoggedIn(loggedIn) {
   $("login-section").hidden = loggedIn;
   $("app").hidden = !loggedIn;
   $("logout").hidden = !loggedIn;
+  if (loggedIn) loadActivities();
+}
+
+// 寫回與匯出：從已結束的搶答活動中選擇（002 tasks T058）
+async function loadActivities() {
+  const res = await api("/api/activities");
+  if (!res.ok) return;
+  const select = $("activity-select");
+  select.replaceChildren(new Option("（請選擇）", ""));
+  for (const a of (await res.json()).filter((x) => x.phase === "ended")) {
+    const option = new Option(`${new Date(a.ended_at).toLocaleString()} 結束（${a.id.slice(0, 8)}…）`, a.id);
+    option.dataset.worksheet = a.worksheet_id;
+    select.appendChild(option);
+  }
 }
 
 function renderPreview(ws) {
@@ -103,6 +117,15 @@ for (const [id, action, done] of [["confirm-btn", "confirm", "已確認，這份
     showMessage(done);
   });
 }
+
+$("activity-select").addEventListener("change", (e) => {
+  const option = e.target.selectedOptions[0];
+  if (!option || !option.value) return;
+  $("activity-id").value = option.value;
+  $("writeback-worksheet").value = option.dataset.worksheet;
+});
+
+$("reload-activities").addEventListener("click", loadActivities);
 
 $("writeback-btn").addEventListener("click", async () => {
   const worksheetId = $("writeback-worksheet").value.trim();
