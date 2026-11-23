@@ -1,7 +1,7 @@
 # Diagrams: 線上分組搶答活動
 
 **審閱**：2026-11-23，9 張 .puml 已逐張對照 spec.md、data-model.md、contracts/，內容一致（tasks T001）。
-本機未安裝 PlantUML，PNG 沿用 repo 中既有版本；之後修改 .puml 時須重新產生。
+實作後已依程式碼更新 08-class、09-component 並重新產生 PNG（tasks T063，PlantUML 1.2024.8）。
 
 **Feature**: [spec.md](./spec.md) | **Data model**: [data-model.md](./data-model.md) | **API**: [contracts/](./contracts/)
 
