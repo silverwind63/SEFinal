@@ -1,6 +1,6 @@
 # Implementation Plan: 線上分組搶答活動
 
-**Branch**: `002-online-buzz-activity`（目前在 `master` 工作，尚未建立分支） | **Date**: 2026-11-22 | **Spec**: [spec.md](./spec.md)
+**Branch**: 從 `main` 開功能分支（例如 `feat/002-us1`） | **Date**: 2026-11-22 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/002-online-buzz-activity/spec.md`
 
