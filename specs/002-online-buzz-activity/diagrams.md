@@ -9,7 +9,7 @@
 產生 PNG（在 repo 根目錄執行）：
 
 ```bash
-java -jar plantuml.jar -tpng "./diagrams/**/*.puml"
+plantuml -tpng "./diagrams/**/*.puml"
 ```
 
 | # | 圖表 | 原始檔 | 對應需求 |
