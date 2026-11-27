@@ -63,6 +63,11 @@ function render(v) {
 
   const mine = Object.fromEntries(v.my_submissions.map((s) => [s.unit_key, s]));
   const box = $("units");
+  // 重畫會換掉所有輸入框：先記下還沒送出的內容與游標位置，畫完再填回，
+  // 否則同組其他視窗送出、冷卻倒數、判定無效時，正在打的答案會被清掉。
+  const drafts = Object.fromEntries([...box.querySelectorAll("input:not(:disabled)")].map((i) => [i.name, i.value]));
+  const active = box.contains(document.activeElement) && document.activeElement.tagName === "INPUT" ? document.activeElement : null;
+  const caret = active && { name: active.name, start: active.selectionStart, end: active.selectionEnd };
   box.replaceChildren();
   for (const u of v.units) {
     const form = document.createElement("form");
@@ -79,6 +84,7 @@ function render(v) {
       input.maxLength = 1000;
       input.disabled = Boolean(done) || v.phase !== "running";
       if (done) input.value = done.answers[String(no)] ?? "";
+      else if (!input.disabled) input.value = drafts[input.name] ?? "";
       label.appendChild(input);
       form.appendChild(label);
     }
@@ -94,6 +100,11 @@ function render(v) {
     form.appendChild(status);
     form.addEventListener("submit", (e) => { e.preventDefault(); send(u, form); });
     box.appendChild(form);
+  }
+  const refocus = caret && box.querySelector(`input[name="${caret.name}"]:not(:disabled)`);
+  if (refocus) {
+    refocus.focus();
+    refocus.setSelectionRange(caret.start, caret.end);
   }
 
   $("results-section").hidden = !v.results;
