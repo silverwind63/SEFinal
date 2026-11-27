@@ -114,7 +114,7 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
 
 ### Tests for User Story 2、3 ⚠️
 
-- [ ] T008 [P] [US2] 在 tests/integration/test_pages.py 新增老師頁元素測試（contracts/pages.md「老師頁」）。`GET /teacher` 的內容須符合：
+- [X] T008 [P] [US2] 在 tests/integration/test_pages.py 新增老師頁元素測試（contracts/pages.md「老師頁」）。`GET /teacher` 的內容須符合：
   - 有「老師登入」與密碼欄。
   - `<script>` 只有 `/teacher.js`。
   - 整頁沒有任何 `<a href`（FR-008）。
@@ -122,7 +122,7 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
   - 沒有「學習單 ID」「活動 ID」輸入框，也沒有「寫回答案與匯出結果」（FR-020）。
   - `GET /index.html`、`GET /app.js` 回 404（research R3）。
   - 執行並確認失敗。
-- [ ] T009 [P] [US3] 在 tests/integration/test_worksheet_api.py 新增 `GET /api/worksheets` 的 data-model.md `WorksheetSummary.confirmed_at` 測試：
+- [X] T009 [P] [US3] 在 tests/integration/test_worksheet_api.py 新增 `GET /api/worksheets` 的 data-model.md `WorksheetSummary.confirmed_at` 測試：
   - 匯入後（pending）為 `null`。
   - 確認後為可以用 `datetime.fromisoformat` 解析的字串。
   - 取消後（cancelled）為 `null`。
@@ -131,10 +131,10 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
 
 ### Implementation for User Story 2、3、4
 
-- [ ] T010 [US3] 實作 data-model.md `WorksheetSummary.confirmed_at`，使 T009 通過：
+- [X] T010 [US3] 實作 data-model.md `WorksheetSummary.confirmed_at`，使 T009 通過：
   - src/guided_buzz/api/schemas.py：`WorksheetSummary` 新增 `confirmed_at: str | None`。
   - src/guided_buzz/api/worksheet_routes.py：`list_worksheets` 填入 `ws.confirmed_at.isoformat()` 或 `None`。
-- [ ] T011 [US2] 改寫 src/guided_buzz/web/static/teacher.html 為單一老師頁（contracts/pages.md「老師頁」）：
+- [X] T011 [US2] 改寫 src/guided_buzz/web/static/teacher.html 為單一老師頁（contracts/pages.md「老師頁」）：
   - 頁首只有標題與 `#logout`，移除 `<nav>` 裡的連結。
   - `#login-section` 不變。
   - `#app` 內依序放 5 個 section：
@@ -144,23 +144,23 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
     - **`#activity-section`**：
       - 沿用主控台。
       - 新增沒有活動時的說明。
-      - 新增 `#ended-actions`，內含「寫回答案」「下載 CSV」按鈕與寫回結果區，預設隱藏。
+      - 新增 `#ended-actions`，內含「寫回答案」「下載 CSV」按鈕，預設隱藏。寫回與下載的結果顯示在畫面底部固定的訊息區（T017）。
     - **`#activities-section`**：活動清單表格（編號、學習單、階段、建立時間、結束時間、檢視）。
   - 頁面只載入 `/teacher.js`。
-- [ ] T012 [US2] 修改 src/guided_buzz/web/static/teacher.js 的登入流程（research R4、R6）：
+- [X] T012 [US2] 修改 src/guided_buzz/web/static/teacher.js 的登入流程（research R4、R6）：
   - 改用 app.js 的 `formatError`（會逐條列出 `issues`），並刪除重複的輔助函式，每個只保留一份。
   - 重新整理時以 `GET /api/auth/session` 確認身分（FR-022）。
   - 登入後才呼叫 `connect()`（FR-023）。
   - 登出時先把 `socket.onclose` 設為 `null`，再 `close()`，然後回到 `#login-section`，網址不變（FR-021）。
   - sessionStorage 的鍵名沿用 data-model.md 第 2 節「老師頁」。
-- [ ] T013 [US3] 在 src/guided_buzz/web/static/teacher.js 加入學習單功能：
+- [X] T013 [US3] 在 src/guided_buzz/web/static/teacher.js 加入學習單功能：
   - 從 app.js 搬入匯入、預覽、確認、取消。
   - `loadWorksheets()` 取得 `GET /api/worksheets` 後，同時更新已確認的學習單表格與建立活動的選單：
     - 只列出 `status === "confirmed"` 的學習單。
     - 表格的確認時間顯示 data-model.md `WorksheetSummary.confirmed_at`。
   - 確認或取消後立即重新載入（FR-012）。
   - 沒有已確認的學習單時，提示先匯入。
-- [ ] T014 [US3] 在 src/guided_buzz/web/static/teacher.js 加入目前活動的寫回與下載（research R7、R8）：
+- [X] T014 [US3] 在 src/guided_buzz/web/static/teacher.js 加入目前活動的寫回與下載（research R7、R8）：
   - 沒有 `current` 時顯示說明。
   - `current.phase === "ended"` 時才顯示 `#ended-actions`（FR-015）。
   - **寫回答案**：
@@ -171,13 +171,13 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
     - 沿用 app.js 的 blob 下載，以及讀取 `X-Record-Count` 的做法。
     - 0 筆時顯示「此活動沒有任何送出紀錄」（FR-017）。
   - **WebSocket**：收到 `snapshot` 時，只有在沒有 `current`，或快照 id 等於 `current.id` 時才 `render`。
-- [ ] T015 [US4] 在 src/guided_buzz/web/static/teacher.js 加入活動清單（research R9）：
+- [X] T015 [US4] 在 src/guided_buzz/web/static/teacher.js 加入活動清單（research R9）：
   - `loadActivities()` 取得 `GET /api/activities`。「學習單」欄以 `worksheet_id` 對照 `loadWorksheets()` 的結果，顯示試算表名稱。
   - 以下時機重新載入：登入後、建立活動後、收到 `phase_changed` 時（FR-018）。
   - 「檢視」以 `GET /api/activities/{id}` 取得活動，設為 `current`，並把 id 存進 sessionStorage。
   - 回 409（活動已中斷）時，只顯示伺服器的訊息，`current` 不變（FR-019）。
-- [ ] T016 [US2] 刪除 src/guided_buzz/web/static/index.html 與 src/guided_buzz/web/static/app.js（research R3）。刪除後在 `src/`、`tests/` 中 grep `index.html`、`app.js`，確認沒有其他地方引用它們。
-- [ ] T017 [P] [US2] 修改 src/guided_buzz/web/static/style.css：補上老師頁新增區塊與表格需要的少量樣式，以沿用既有樣式為主。
+- [X] T016 [US2] 刪除 src/guided_buzz/web/static/index.html 與 src/guided_buzz/web/static/app.js（research R3）。刪除後在 `src/`、`tests/` 中 grep `index.html`、`app.js`，確認沒有其他地方引用它們。
+- [X] T017 [P] [US2] 修改 src/guided_buzz/web/static/style.css：補上老師頁新增區塊與表格需要的少量樣式，以沿用既有樣式為主。
 
 **Checkpoint**：
 - T008、T009 通過，`uv run pytest` 全部通過。

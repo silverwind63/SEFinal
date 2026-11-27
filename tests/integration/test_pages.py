@@ -58,3 +58,34 @@ def test_student_page_has_no_teacher_parts(client):
     html = client.get("/").text
     assert 'type="password"' not in html
     assert scripts(html) == ["/student.js"]
+
+
+# ---- 老師頁（FR-007～FR-009、FR-020、FR-026）----
+
+TEACHER_SECTIONS = ["匯入學習單", "已確認的學習單", "建立搶答活動", "目前活動", "活動清單"]
+
+
+def test_teacher_page_login_and_scripts(client):
+    html = client.get("/teacher").text
+    assert "<h2>老師登入</h2>" in html
+    assert 'type="password"' in html
+    assert scripts(html) == ["/teacher.js"]
+    assert "<a " not in html  # 頁首與內容都沒有連到其他頁面的連結
+
+
+def test_teacher_page_sections_in_order(client):
+    headings = re.findall(r"<h2[^>]*>([^<]+)", client.get("/teacher").text)
+    positions = [next(i for i, h in enumerate(headings) if h.startswith(name)) for name in TEACHER_SECTIONS]
+    assert positions == sorted(positions)
+
+
+def test_teacher_page_has_no_manual_id_inputs(client):
+    html = client.get("/teacher").text
+    assert "寫回答案與匯出結果" not in html
+    assert "學習單 ID" not in html
+    assert 'id="activity-id"' not in html
+
+
+@pytest.mark.parametrize("path", ["/index.html", "/app.js"])
+def test_old_teacher_entry_removed(client, path):
+    assert client.get(path).status_code == 404

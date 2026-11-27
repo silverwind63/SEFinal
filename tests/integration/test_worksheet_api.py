@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from guided_buzz.domain.errors import SheetForbidden, SheetsUnavailable
 
 SAMPLE_B = "1PXXwWiBKJNpPkLRoJLMzZWsAh4Jzn2bThHTeRAiq3Hg"
@@ -28,6 +30,18 @@ def test_confirm_and_state_rules(client, auth, sheets):
     again = client.post(f"/api/worksheets/{wid}/confirm", headers=auth)
     assert again.status_code == 409 and again.json()["error"]["code"] == "INVALID_STATE"
     assert client.get(f"/api/worksheets/{wid}", headers=auth).json()["status"] == "confirmed"
+
+
+def test_list_includes_confirmed_at(client, auth, sheets):
+    """003 contracts/api-changes.md：只新增 confirmed_at；待確認與已取消時為 null。"""
+    pending, confirmed, cancelled = (import_b(client, auth, sheets).json()["id"] for _ in range(3))
+    client.post(f"/api/worksheets/{confirmed}/confirm", headers=auth)
+    client.post(f"/api/worksheets/{cancelled}/cancel", headers=auth)
+    rows = {w["id"]: w for w in client.get("/api/worksheets", headers=auth).json()}
+    assert rows[pending]["confirmed_at"] is None
+    assert rows[cancelled]["confirmed_at"] is None
+    assert datetime.fromisoformat(rows[confirmed]["confirmed_at"]) >= datetime.fromisoformat(rows[confirmed]["created_at"])
+    assert set(rows[confirmed]) == {"id", "spreadsheet_title", "status", "question_count", "group_count", "created_at", "confirmed_at"}
 
 
 def test_cancel_then_confirm_conflicts(client, auth, sheets):
@@ -80,4 +94,4 @@ def test_list_only_own(client, auth, sheets):
     wid = import_b(client, auth, sheets).json()["id"]
     items = client.get("/api/worksheets", headers=auth).json()
     assert [i["id"] for i in items] == [wid]
-    assert set(items[0]) == {"id", "spreadsheet_title", "status", "question_count", "group_count", "created_at"}
+    assert set(items[0]) == {"id", "spreadsheet_title", "status", "question_count", "group_count", "created_at", "confirmed_at"}  # confirmed_at：003 新增
