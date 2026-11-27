@@ -43,21 +43,21 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
 
 **⚠️ CRITICAL**: 本階段完成前，不得開始 Phase 2、Phase 3
 
-- [ ] T001 撰寫 tests/integration/test_pages.py 的路由測試（contracts/pages.md「網址」表）：
+- [X] T001 撰寫 tests/integration/test_pages.py 的路由測試（contracts/pages.md「網址」表）：
   - `GET /` 回 200、`text/html`，內容是學生頁（含「加入組別」）。
   - `GET /teacher` 回 200，內容含「老師登入」。
   - 以 `follow_redirects=False` 請求 `/student.html`、`/teacher.html`：回 307，`Location` 分別為 `/`、`/teacher`。
   - 以上 4 條路由都不出現在 `/openapi.json`。
   - `/student.js`、`/teacher.js`、`/style.css` 仍回 200。
   - 執行並確認 `/teacher`、兩條導向等新路由的測試失敗。
-- [ ] T002 實作 src/guided_buzz/api/page_routes.py（research R1、R2）：
+- [X] T002 實作 src/guided_buzz/api/page_routes.py（research R1、R2）：
   - 在這個模組定義 `STATIC_DIR`，作為 `web/static` 路徑的唯一定義（原則 V）。
   - `APIRouter` 提供以下路由，全部設定 `include_in_schema=False`：
     - `GET /` 以 `FileResponse` 回傳 `STATIC_DIR / "student.html"`。
     - `GET /teacher` 以 `FileResponse` 回傳 `STATIC_DIR / "teacher.html"`。
     - `GET /student.html` 以 `RedirectResponse("/")` 導向。
     - `GET /teacher.html` 以 `RedirectResponse("/teacher")` 導向。
-- [ ] T003 修改 src/guided_buzz/api/app.py：
+- [X] T003 修改 src/guided_buzz/api/app.py：
   - 刪除本檔的 `STATIC_DIR`，改從 `page_routes` 匯入。
   - `app.include_router(page_routes.router)` 必須放在 `app.mount("/", StaticFiles(...))` 之前。
   - 執行 `uv run pytest`，確認 T001 與所有既有測試都通過。
