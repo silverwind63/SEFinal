@@ -70,6 +70,7 @@ class WorksheetSummary(BaseModel):
     question_count: int
     group_count: int
     created_at: str
+    confirmed_at: str | None  # 003：已確認時才有值
 
 
 class StatusOut(BaseModel):

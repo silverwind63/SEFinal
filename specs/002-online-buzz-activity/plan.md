@@ -36,7 +36,7 @@ auth、api 骨架，並使用 001 確認後的 `ParsedWorksheet`。
 **Constraints**: 單一程序（記憶體中的狀態與鎖）；學生不可取得他組資料（FR-014）；組別代碼與 Token 不寫入 log；
 參數全部可以設定（research R10）
 
-**Scale/Scope**: 同時只有一場活動；組數 ≤ 20（可設定）；搶答單位 ≤ 500；學生頁面與老師主控台各一個
+**Scale/Scope**: 同時只有一場活動；組數 ≤ 20（可設定）；搶答單位 ≤ 500；學生頁 `/` 與老師頁 `/teacher` 各一個（003 起；老師頁含匯入、寫回與匯出）
 
 ## Constitution Check
 
@@ -105,8 +105,8 @@ src/guided_buzz/
 │   ├── activity_routes.py       # 老師端
 │   └── student_routes.py        # 加入、送出、/me、結果、公開的 phase
 └── web/static/
-    ├── teacher.html / teacher.js # 活動主控台
-    └── student.html / student.js # 學生頁面
+    ├── teacher.html / teacher.js # 老師頁 /teacher（003 起併入匯入、寫回與匯出）
+    └── student.html / student.js # 學生頁（003 起為首頁 /）
 
 tests/
 ├── unit/

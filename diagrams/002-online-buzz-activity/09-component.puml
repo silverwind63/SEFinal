@@ -1,7 +1,7 @@
 @startuml
 !pragma layout smetana
 title 組件圖：線上分組搶答活動
-component "web/static\n老師頁面・學生頁面" as web
+component "web/static\n學生頁 /（student.html・student.js）\n老師頁 /teacher（teacher.html・teacher.js）" as web
 package "guided_buzz" {
   component "api\nactivity_routes・student_routes" as api
   component "realtime\n連線管理・依身分產生推播" as realtime

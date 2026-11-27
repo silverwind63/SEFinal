@@ -12,10 +12,14 @@
   <main>
     <section id="join-section">
       <h2>加入組別</h2>
+      <p class="hint">每個瀏覽器視窗各自保有自己的身分，可以在不同視窗分別開啟老師與各組畫面。</p>
       <form id="join-form">
-        <label for="code">組別代碼（老師提供的 6 碼）</label>
+        <label for="code">組別代碼（老師發給各組的 6 碼）</label>
         <input id="code" type="text" autocomplete="off" required maxlength="32">
-        <button type="submit">加入</button>
+        <div class="actions">
+          <button type="submit">加入</button>
+          <a class="button secondary" href="/teacher">我是老師</a>
+        </div>
       </form>
     </section>
 

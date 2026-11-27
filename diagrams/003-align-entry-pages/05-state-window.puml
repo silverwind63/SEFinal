@@ -1,0 +1,41 @@
+@startuml
+!pragma layout smetana
+title 狀態圖：每個視窗的畫面狀態（003）
+state "學生頁 /" as SP {
+  state "確認身分" as SCheck
+  state "加入組別" as Join
+  state "作答畫面" as Answer
+  [*] --> Join : 這個視窗沒有學生身分
+  [*] --> SCheck : 這個視窗保有學生身分（重新整理）
+  SCheck --> Answer : 有效
+  SCheck --> Join : 無效（顯示提示）
+  Join --> Answer : 代碼正確
+  Join --> Join : 代碼錯誤（顯示錯誤）
+  Answer --> Join : 代碼被重新產生／活動已中斷（顯示提示）
+}
+state "老師頁 /teacher" as TP {
+  state "確認老師身分" as TCheck
+  state "老師登入" as Login
+  state "已登入（5 個區塊）" as LoggedIn
+  [*] --> Login : 這個視窗沒有老師身分
+  [*] --> TCheck : 這個視窗保有老師身分（重新整理）
+  TCheck --> LoggedIn : 有效
+  TCheck --> Login : 無效
+  Login --> LoggedIn : 密碼正確
+  LoggedIn --> Login : 登出（關閉即時連線）
+}
+SP --> TP : 「我是老師」
+state "「目前活動」區塊（已登入時）" as CA {
+  state "沒有活動" as None
+  state "準備中" as Prep
+  state "搶答中" as Run
+  state "已結束" as Ended
+  Ended : 顯示「寫回答案」「下載 CSV」
+  [*] --> None
+  None --> Prep : 建立活動
+  Prep --> Run : 開始
+  Run --> Ended : 結束
+  None --> Ended : 在活動清單檢視已結束活動
+  Ended --> Ended : 檢視另一場已結束活動
+}
+@enduml

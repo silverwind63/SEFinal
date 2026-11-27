@@ -5,6 +5,8 @@ description: "Task list for 001 學習單匯入、答案寫回與結果匯出"
 
 # Tasks: 學習單匯入、答案寫回與結果匯出
 
+> **後續變更（003，2026-11-27）**：T032、T041、T047 的老師頁面已併入 `/teacher`（`teacher.html`、`teacher.js`），`index.html`、`app.js` 已刪除；以下任務內容保留當時的實作紀錄。
+
 **Input**: Design documents from `/specs/001-guided-notes-import/`
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, diagrams.md（圖表原始檔在 `diagrams/001-guided-notes-import/`）, contracts/, quickstart.md

@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>課堂搶答系統｜搶答主控台</title>
+  <title>課堂搶答系統｜老師</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="icon" href="data:,">
 </head>
 <body>
-  <header><h1>課堂搶答系統｜搶答主控台</h1><nav><a href="/">學習單與結果</a> <button id="logout" hidden>登出</button></nav></header>
+  <header><h1>課堂搶答系統｜老師</h1><button id="logout" hidden>登出</button></header>
   <main>
     <section id="login-section">
       <h2>老師登入</h2>
@@ -20,6 +20,37 @@
     </section>
 
     <div id="app" hidden>
+      <section id="import-section">
+        <h2>匯入學習單（Google Sheets）</h2>
+        <form id="import-form">
+          <label for="sheet-url">試算表網址</label>
+          <input id="sheet-url" type="text" placeholder="https://docs.google.com/spreadsheets/d/…" required maxlength="2048">
+          <button type="submit">匯入</button>
+        </form>
+        <p class="hint">系統以 login-google 登入的 Google 帳號讀寫試算表，該帳號需要有這份學習單的編輯權限。</p>
+        <div id="preview" hidden>
+          <h3 id="preview-title"></h3>
+          <p id="preview-summary"></p>
+          <table>
+            <thead><tr><th>系統題號</th><th>原題號</th><th>子題</th><th>工作表</th><th>儲存格</th><th>題組</th></tr></thead>
+            <tbody id="preview-rows"></tbody>
+          </table>
+          <div class="actions">
+            <button id="confirm-btn">確認</button>
+            <button id="cancel-btn" class="secondary">取消</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="worksheets-section">
+        <h2>已確認的學習單</h2>
+        <p id="no-worksheets" class="hint" hidden>尚無已確認的學習單，請先在上方匯入並確認。</p>
+        <table>
+          <thead><tr><th>編號</th><th>試算表</th><th>題數</th><th>題組數</th><th>確認時間</th></tr></thead>
+          <tbody id="worksheet-rows"></tbody>
+        </table>
+      </section>
+
       <section id="create-section">
         <h2>建立搶答活動</h2>
         <form id="create-form">
@@ -41,22 +72,41 @@
         </form>
       </section>
 
-      <section id="activity-section" hidden>
+      <section id="activity-section">
         <h2>目前活動：<span id="phase"></span></h2>
-        <p class="hint" id="activity-meta"></p>
-        <div class="actions">
-          <button id="start-btn">開始搶答</button>
-          <button id="end-btn" class="secondary">結束搶答</button>
+        <p id="no-activity" class="hint">目前沒有活動。請在上方建立活動，或從下方「活動清單」檢視過去的活動。</p>
+        <div id="activity-detail" hidden>
+          <p class="hint" id="activity-meta"></p>
+          <div class="actions">
+            <button id="start-btn">開始搶答</button>
+            <button id="end-btn" class="secondary">結束搶答</button>
+          </div>
+          <div id="ended-actions" hidden>
+            <p class="hint">活動已結束：可以把搶答成功的答案寫回原本的 Google Sheets 填空格（已有內容的格子不會被覆蓋），或下載結果 CSV。</p>
+            <div class="actions">
+              <button id="writeback-btn">寫回答案</button>
+              <button id="export-btn" class="secondary">下載 CSV</button>
+            </div>
+          </div>
+          <h3>組別</h3>
+          <table>
+            <thead><tr><th>組別</th><th>組別代碼</th><th>成功題數</th><th>冷卻</th><th></th></tr></thead>
+            <tbody id="team-rows"></tbody>
+          </table>
+          <h3>作答狀況</h3>
+          <table>
+            <thead><tr><th>搶答單位</th><th>狀態</th><th>送出（順位．組別．答案．結果）</th></tr></thead>
+            <tbody id="unit-rows"></tbody>
+          </table>
         </div>
-        <h3>組別</h3>
+      </section>
+
+      <section id="activities-section">
+        <h2>活動清單</h2>
+        <p id="no-activities" class="hint" hidden>尚無活動。</p>
         <table>
-          <thead><tr><th>組別</th><th>組別代碼</th><th>成功題數</th><th>冷卻</th><th></th></tr></thead>
-          <tbody id="team-rows"></tbody>
-        </table>
-        <h3>作答狀況</h3>
-        <table>
-          <thead><tr><th>搶答單位</th><th>狀態</th><th>送出（順位．組別．答案．結果）</th></tr></thead>
-          <tbody id="unit-rows"></tbody>
+          <thead><tr><th>編號</th><th>學習單</th><th>階段</th><th>建立時間</th><th>結束時間</th><th></th></tr></thead>
+          <tbody id="activity-rows"></tbody>
         </table>
       </section>
     </div>

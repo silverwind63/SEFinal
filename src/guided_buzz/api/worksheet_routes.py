@@ -40,6 +40,7 @@ def list_worksheets(request: Request, owner: str = Depends(require_teacher)) -> 
             question_count=ws.parsed.question_count,
             group_count=ws.parsed.group_count,
             created_at=ws.created_at.isoformat(),
+            confirmed_at=ws.confirmed_at.isoformat() if ws.confirmed_at else None,
         )
         for ws in worksheets.list_by_owner(request.app.state.db, owner)
     ]

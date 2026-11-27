@@ -1,7 +1,6 @@
 """建立 FastAPI app：路由、統一錯誤格式、靜態檔（contracts/http-api.md）。"""
 
 import logging
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -9,7 +8,8 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from guided_buzz.activity.registry import ActivityRegistry
-from guided_buzz.api import activity_routes, auth_routes, result_routes, student_routes, worksheet_routes
+from guided_buzz.api import activity_routes, auth_routes, page_routes, result_routes, student_routes, worksheet_routes
+from guided_buzz.api.page_routes import STATIC_DIR
 from guided_buzz.auth.sessions import StudentSessions
 from guided_buzz.auth.teacher import TeacherAuth
 from guided_buzz.config import Settings
@@ -21,8 +21,6 @@ from guided_buzz.results.sqlite_provider import SqliteActivityResultsProvider
 from guided_buzz.storage.db import Database
 
 log = logging.getLogger(__name__)
-
-STATIC_DIR = Path(__file__).resolve().parent.parent / "web" / "static"
 
 STATUS = {
     "NOT_FOUND": 404,
@@ -97,5 +95,6 @@ def create_app(settings: Settings, sheets_gateway: SheetsGateway, results_provid
     app.include_router(activity_routes.router)
     app.include_router(student_routes.router)
     app.include_router(realtime.router)  # 新的路由都要在靜態檔之前掛上
+    app.include_router(page_routes.router)  # / 與 /teacher 回傳頁面、舊網址導向（003）
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
     return app

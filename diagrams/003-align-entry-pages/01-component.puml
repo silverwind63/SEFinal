@@ -1,0 +1,25 @@
+@startuml
+!pragma layout smetana
+title 組件圖：入口頁與老師頁（003）
+package "瀏覽器（每個視窗以 sessionStorage 各自保有身分）" {
+  component "學生頁 /\nstudent.html・student.js\n加入組別・作答・結果" as spage
+  component "老師頁 /teacher\nteacher.html・teacher.js\n登入・匯入・已確認學習單・建立活動\n目前活動（含寫回・CSV）・活動清單" as tpage
+}
+package "guided_buzz 伺服器" {
+  component "api.page_routes（本功能新增）\nGET / → student.html\nGET /teacher → teacher.html\n/student.html → 307 /\n/teacher.html → 307 /teacher" as routes
+  component "既有 API（001・002，行為不變）\nauth・worksheets・activities・join\nsubmissions・writeback・results.csv" as api
+  component "realtime /ws（002）\n依身分推播" as ws
+  component "StaticFiles（mount 於最後）\nstudent.js・teacher.js・style.css" as static
+}
+spage ..> tpage : 「我是老師」
+spage --> routes : 載入頁面
+tpage --> routes : 載入頁面
+spage --> static : 只載入 student.js
+tpage --> static : 只載入 teacher.js
+spage --> api : 加入・本組畫面・送出\n（學生身分）
+tpage --> api : 老師功能\n（老師身分）
+spage --> ws : 加入後才連線
+tpage --> ws : 登入後才連線；登出時關閉
+note bottom of api : 唯一的 API 變更：GET /api/worksheets 多回傳 confirmed_at（唯讀）
+note bottom of static : 刪除 index.html・app.js（併入 teacher.html・teacher.js）
+@enduml
