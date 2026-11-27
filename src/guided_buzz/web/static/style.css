@@ -5,8 +5,9 @@ main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
 section { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
 label { display: block; margin-bottom: 4px; font-weight: 600; }
 input { width: 100%; max-width: 560px; padding: 8px; box-sizing: border-box; margin-bottom: 8px; }
-button { padding: 8px 16px; border: 0; border-radius: 4px; background: #2680c2; color: #fff; cursor: pointer; }
-button.secondary { background: #829ab1; }
+button, a.button { padding: 8px 16px; border: 0; border-radius: 4px; background: #2680c2; color: #fff; cursor: pointer; font: inherit; }
+a.button { display: inline-block; text-decoration: none; }
+button.secondary, a.button.secondary { background: #829ab1; }
 button:disabled { opacity: .5; cursor: not-allowed; }
 table { border-collapse: collapse; width: 100%; margin: 8px 0; }
 th, td { border: 1px solid #d9e2ec; padding: 6px 8px; text-align: left; }

@@ -77,7 +77,7 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T004 [P] [US1] 在 tests/integration/test_pages.py 新增學生頁元素測試（contracts/pages.md「學生頁」）。`GET /` 的內容須符合：
+- [X] T004 [P] [US1] 在 tests/integration/test_pages.py 新增學生頁元素測試（contracts/pages.md「學生頁」）。`GET /` 的內容須符合：
   - 有「加入組別」標題，以及說明文字（FR-001 原文）。
   - 有組別代碼欄位、「加入」按鈕，以及 `href="/teacher"` 的「我是老師」。
   - 沒有 `type="password"`。
@@ -86,18 +86,18 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] 修改 src/guided_buzz/web/static/student.html：
+- [X] T005 [US1] 修改 src/guided_buzz/web/static/student.html：
   - 在 `#join-section` 的標題下方加上說明文字（FR-001）。
   - 把「加入」按鈕和「我是老師」連結（`<a href="/teacher" class="button">`）放在同一列。
   - 兩者都在 `#join-section` 內，加入後會隨區塊一起隱藏（FR-003）。
   - 頁面只載入 `/student.js`。
-- [ ] T006 [US1] 對照以下需求檢查 src/guided_buzz/web/static/student.js，只修改不符合的地方（現有程式大多已經符合）：
+- [X] T006 [US1] 對照以下需求檢查 src/guided_buzz/web/static/student.js，只修改不符合的地方（現有程式大多已經符合）：
   - 加入成功，或重新整理時 `GET /api/me` 確認身分有效：隱藏 `#join-section`，顯示作答畫面（FR-003、FR-006）。
   - 加入失敗（代碼錯誤、格式不符、輸錯達上限）時，留在 `#join-section`，並顯示既有的錯誤訊息（FR-004）。
   - `leave()`：顯示 `#join-section`，並顯示提示訊息（FR-005）。
   - 即時連線只在加入或身分有效之後才建立（FR-023）。
   - sessionStorage 的鍵名沿用 data-model.md 第 2 節「學生頁」。
-- [ ] T007 [P] [US1] 修改 src/guided_buzz/web/static/style.css：加入按鈕並排的樣式，以及讓 `a.button` 看起來和 `button` 一樣。
+- [X] T007 [P] [US1] 修改 src/guided_buzz/web/static/style.css：加入按鈕並排的樣式，以及讓 `a.button` 看起來和 `button` 一樣。
 
 **Checkpoint**：
 - T004 通過，`uv run pytest` 全部通過。
