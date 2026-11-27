@@ -189,13 +189,13 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
 
 **Purpose**：完成 FR-029 的文件同步、原則 VII 的圖表驗證，以及 E-01～E-10 的完整人工驗證。
 
-- [ ] T018 [P] 依 plan.md「文件與圖表同步清單」更新 README.md 的以下段落：
+- [X] T018 [P] 依 plan.md「文件與圖表同步清單」更新 README.md 的以下段落：
   - 「頁面網址」表
   - 「1. 匯入並確認學習單」
   - 「2. 建立搶答活動」
   - 「4. 結束搶答、寫回學習單、匯出 CSV」
   - 「學生操作說明」
-- [ ] T019 [P] 依 plan.md 同步清單更新 001 的文件：
+- [X] T019 [P] 依 plan.md 同步清單更新 001 的文件：
   - **改寫內容**：
     - specs/001-guided-notes-import/plan.md（Scale/Scope 與 web/static 結構）
     - specs/001-guided-notes-import/quickstart.md（第 78 行網址）
@@ -203,18 +203,18 @@ description: "Task list for 003 入口頁與老師頁面對齊 OpenSpec 組"
   - **只加註記**：
     - specs/001-guided-notes-import/spec.md（Clarifications 補一行）
     - specs/001-guided-notes-import/tasks.md（開頭）
-- [ ] T020 [P] 依 plan.md 同步清單更新 002 的文件：
+- [X] T020 [P] 依 plan.md 同步清單更新 002 的文件：
   - **改寫內容**：specs/002-online-buzz-activity/plan.md（Scale/Scope 與 web/static 結構）。
   - **只加註記，保留原文**：specs/002-online-buzz-activity/tasks.md（開頭）、specs/002-online-buzz-activity/verification.md（環境表下方）。
-- [ ] T021 對照最終程式碼檢查以下圖表（原則 VII 實作階段驗證）：
+- [X] T021 對照最終程式碼檢查以下圖表（原則 VII 實作階段驗證）：
   - diagrams/003-align-entry-pages/ 的 5 張圖
   - diagrams/001-guided-notes-import/06-component.puml
   - diagrams/002-online-buzz-activity/09-component.puml
   - 不一致時先更新 `.puml`，在 repo 根目錄執行 `plantuml -tpng "./diagrams/**/*.puml"`，再同步 specs/003-align-entry-pages/diagrams.md。
-- [ ] T022 在 README.md、specs/001-guided-notes-import/、specs/002-online-buzz-activity/、src/ 中 grep 以下字串：`student.html`、`teacher.html`、`搶答主控台`、`學習單與結果`、`寫回答案與匯出結果`。
+- [X] T022 在 README.md、specs/001-guided-notes-import/、specs/002-online-buzz-activity/、src/ 中 grep 以下字串：`student.html`、`teacher.html`、`搶答主控台`、`學習單與結果`、`寫回答案與匯出結果`。
   - 確認除了 T019、T020 的歷史註記、檔案名稱本身（例如 `teacher.html` 這個原始檔），以及 `page_routes.py` 的導向路由之外，沒有其他指向舊入口的說明（FR-029）。
-- [ ] T023 執行 `uv run pytest -v`（tests/ 全部），回報測試指令、通過數與失敗數，失敗時附上輸出（原則 VI、SC-005）。
-- [ ] T024 依 specs/003-align-entry-pages/quickstart.md 的 V1–V8，人工驗證 E-01～E-10：
+- [X] T023 執行 `uv run pytest -v`（tests/ 全部），回報測試指令、通過數與失敗數，失敗時附上輸出（原則 VI、SC-005）。
+- [X] T024 依 specs/003-align-entry-pages/quickstart.md 的 V1–V8，人工驗證 E-01～E-10：
   - 結果記錄在 specs/003-align-entry-pages/verification.md，格式參考 specs/002-online-buzz-activity/verification.md。
   - 回報人工驗證結果。
 

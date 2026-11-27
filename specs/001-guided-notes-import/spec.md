@@ -10,6 +10,8 @@
 
 ## Clarifications
 
+> 2026-11-27：老師與學生的入口改由 [003](../003-align-entry-pages/spec.md) 定義（老師 `/teacher`、學生 `/`），本規格的需求不變。
+
 ### Session 2026-11-22
 
 - Q: 學習單中的填空格是如何標記的？ → A: 學習單是 Google Sheet，填空格就是試算表中的一個空白儲存格。

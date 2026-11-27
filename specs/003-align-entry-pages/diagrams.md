@@ -28,6 +28,10 @@ plantuml -tpng "./diagrams/**/*.puml"
 ![類別圖](../../diagrams/003-align-entry-pages/04-class.png)
 ![狀態圖](../../diagrams/003-align-entry-pages/05-state-window.png)
 
+## 實作後驗證（T021，2026-11-27）
+
+已對照最終程式碼檢查 5 張圖與 001、002 的組件圖。類別圖原本把舊網址導向畫成前端元件，實際是由後端 `api.page_routes` 以 307 導向，已更新 `.puml` 與 PNG；其餘圖表與程式一致。
+
 ## 設計規則
 
 - 頁面只負責顯示與呼叫既有 API。誰能做什麼、誰先搶到，都由伺服器判定，與 001、002 相同。

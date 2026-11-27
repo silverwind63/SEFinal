@@ -13,6 +13,8 @@
 | 操作方式 | 同一台電腦、同一個瀏覽器的多個視窗：老師視窗（`/`、`/teacher.html`）與各組學生視窗（`/student.html`） |
 | 學習單 | 以 Google Sheets 匯入並確認的 Guided Notes |
 
+> 當時的入口為 `/`、`/teacher.html`、`/student.html`；003 起改為學生 `/`、老師 `/teacher`，舊網址會自動導向。以下紀錄保留原樣。
+
 ## 自動化測試
 
 ```bash

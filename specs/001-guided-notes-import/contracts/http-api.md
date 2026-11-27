@@ -101,7 +101,8 @@
 
 ## GET /api/worksheets
 
-200：`[{"id", "spreadsheet_title", "status", "question_count", "group_count", "created_at"}]`，只列出本人擁有的學習單。
+200：`[{"id", "spreadsheet_title", "status", "question_count", "group_count", "created_at", "confirmed_at"}]`，只列出本人擁有的學習單。
+`confirmed_at` 由 003 新增（[003 api-changes](../../003-align-entry-pages/contracts/api-changes.md)）：已確認時為 ISO 8601 字串，待確認或已取消時為 `null`。
 
 ## POST /api/worksheets/{id}/writeback
 

@@ -23,8 +23,13 @@ package "web/static（前端，本功能修改）" {
     寫回答案() / 下載CSV()
     檢視(活動)
   }
-  class LegacyRedirect <<student.html・teacher.html>> {
-    導向新網址()
+}
+package "api.page_routes（伺服器，本功能新增）" {
+  class PageRoutes {
+    GET / → student.html
+    GET /teacher → teacher.html
+    GET /student.html → 307 /
+    GET /teacher.html → 307 /teacher
   }
 }
 package "伺服器回傳的資料（001・002 定義，所屬模組不變）" {
@@ -56,6 +61,6 @@ TeacherPage --> TeacherView : 目前活動
 TeacherPage --> WorksheetSummary : 已確認清單・建立活動選單
 TeacherPage --> ActivitySummary : 活動清單
 TeacherPage --> WritebackOut : 寫回結果
-LegacyRedirect ..> StudentPage
-LegacyRedirect ..> TeacherPage
+PageRoutes ..> StudentPage : 回傳頁面
+PageRoutes ..> TeacherPage : 回傳頁面
 @enduml

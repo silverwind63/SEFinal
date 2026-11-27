@@ -5,6 +5,8 @@ description: "Task list for 002 線上分組搶答活動"
 
 # Tasks: 線上分組搶答活動
 
+> **後續變更（003，2026-11-27）**：T028、T029、T037、T044、T050、T056、T058 提到的頁面已調整，學生頁改為 `/`，老師頁改為 `/teacher`（含匯入、寫回與匯出）；以下任務內容保留當時的實作紀錄。
+
 **Input**: Design documents from `/specs/002-online-buzz-activity/`
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, diagrams.md, contracts/, quickstart.md；

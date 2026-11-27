@@ -34,7 +34,7 @@ Sheets API 回應快照（JSON），以及測試時動態產生的表格資料�
 **Constraints**: 寫回只寫入原本空白的填空格，非填空格內容 0 處被改動（SC-003、FR-026）；唯一的外部服務是
 Google Sheets（Constitution 2.0.0）；不寫死路徑或常數；機敏資料（OAuth client 設定檔與 token 檔的路徑）只放環境變數
 
-**Scale/Scope**: 1 位老師；每份學習單 ≤ 500 題（可設定）；約 3 個老師頁面（登入、匯入與確認、寫回與匯出）
+**Scale/Scope**: 1 位老師；每份學習單 ≤ 500 題（可設定）；老師頁 `/teacher` 一頁（登入、匯入與確認、寫回與匯出；003 起與搶答主控台合併）
 
 ## Constitution Check
 
@@ -112,8 +112,8 @@ src/guided_buzz/
 │   ├── worksheet_routes.py
 │   └── result_routes.py     # 寫回、CSV
 └── web/static/
-    ├── index.html           # 老師登入、匯入與確認、寫回與匯出
-    ├── app.js               # Token 存在 sessionStorage
+    ├── teacher.html         # 老師頁 /teacher：登入、匯入與確認、寫回與匯出（003 起取代 index.html，並併入 002 主控台）
+    ├── teacher.js           # Token 存在 sessionStorage（003 起取代 app.js）
     └── style.css
 
 tests/
