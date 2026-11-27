@@ -1,7 +1,7 @@
 @startuml
 !pragma layout smetana
 title 組件圖：學習單匯入、答案寫回與結果匯出
-component "web/static\n老師頁面" as web
+component "web/static\n老師頁 /teacher（teacher.html・teacher.js）\n匯入・確認・寫回・匯出（003 起與搶答主控台合併）" as web
 cloud "Google Sheets API" as gapi
 package "guided_buzz" {
   component "api\n路由・輸入驗證・錯誤格式" as api

@@ -1,0 +1,61 @@
+@startuml
+!pragma layout smetana
+title 類別圖：前端頁面與使用的既有資料（003）
+package "web/static（前端，本功能修改）" {
+  class StudentPage <<首頁 />> {
+    視窗 ID
+    學生身分
+    --
+    加入()
+    重新整理時確認身分()
+    顯示作答畫面()
+    回到加入組別(提示訊息)
+  }
+  class TeacherPage <<老師頁 /teacher>> {
+    老師身分
+    目前活動
+    --
+    登入() / 登出()
+    匯入() / 確認() / 取消()
+    更新學習單清單與選單()
+    建立活動() / 開始() / 結束()
+    判定無效() / 重新產生代碼()
+    寫回答案() / 下載CSV()
+    檢視(活動)
+  }
+  class LegacyRedirect <<student.html・teacher.html>> {
+    導向新網址()
+  }
+}
+package "伺服器回傳的資料（001・002 定義，所屬模組不變）" {
+  class StudentView <<activity.engine（002）>> {
+    activity_id, phase, team
+    cooldown_remaining
+    units, my_submissions, results
+  }
+  class TeacherView <<activity.engine（002）>> {
+    id, worksheet_id, phase, fairness
+    teams, units（含 submissions）
+  }
+  class WorksheetSummary <<api.schemas（001）>> {
+    id, spreadsheet_title, status
+    question_count, group_count, created_at
+    confirmed_at（本功能新增，唯讀）
+  }
+  class ActivitySummary <<api.activity_routes（002）>> {
+    id, worksheet_id, phase
+    created_at, ended_at
+  }
+  class WritebackOut <<api.schemas（001）>> {
+    filled, unfilled, skipped_non_empty
+  }
+}
+StudentPage --> StudentView : 顯示本組畫面
+StudentPage ..> TeacherPage : 「我是老師」
+TeacherPage --> TeacherView : 目前活動
+TeacherPage --> WorksheetSummary : 已確認清單・建立活動選單
+TeacherPage --> ActivitySummary : 活動清單
+TeacherPage --> WritebackOut : 寫回結果
+LegacyRedirect ..> StudentPage
+LegacyRedirect ..> TeacherPage
+@enduml
