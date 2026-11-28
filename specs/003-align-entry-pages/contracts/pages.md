@@ -16,6 +16,7 @@
 | `GET /student.js`、`/teacher.js`、`/style.css` | 200 | 靜態檔，不變 |
 
 - 以上頁面路由都不需要登入；身分由頁面載入後的程式自行檢查。
+- `/api/` 以外的回應（頁面、JS、CSS、導向）都帶 `Cache-Control: no-cache`：瀏覽器每次都要先向伺服器確認，檔案沒有變更時回 304。這樣程式更新後，不會出現新後端配舊畫面（2026-11-28 新增）。
 - 頁面路由不出現在 OpenAPI 文件中（`include_in_schema=False`）。
 
 ## 學生頁 `/`
