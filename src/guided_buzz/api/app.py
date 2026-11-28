@@ -70,6 +70,14 @@ def create_app(settings: Settings, sheets_gateway: SheetsGateway, results_provid
             results_provider = SqliteActivityResultsProvider(app.state.registry.repo)
     app.state.results = results_provider
 
+    @app.middleware("http")
+    async def revalidate_frontend(request: Request, call_next):
+        # 頁面與 JS、CSS 每次都先向伺服器確認是否有新版（沒變就回 304），避免程式更新後瀏覽器沿用舊畫面
+        response = await call_next(request)
+        if not request.url.path.startswith("/api/"):
+            response.headers.setdefault("Cache-Control", "no-cache")
+        return response
+
     @app.exception_handler(DomainError)
     def domain_error(_: Request, exc: DomainError):
         issues = None

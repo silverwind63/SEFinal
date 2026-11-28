@@ -89,3 +89,23 @@ def test_teacher_page_has_no_manual_id_inputs(client):
 @pytest.mark.parametrize("path", ["/index.html", "/app.js"])
 def test_old_teacher_entry_removed(client, path):
     assert client.get(path).status_code == 404
+
+
+# ---- 快取：程式更新後，瀏覽器不能沿用舊的頁面與 JS（2026-11-28 Safari 實際發生）----
+
+FRONTEND = ["/", "/teacher", "/student.js", "/teacher.js", "/style.css"]
+
+
+@pytest.mark.parametrize("path", FRONTEND)
+def test_frontend_is_always_revalidated(client, path):
+    assert client.get(path).headers["cache-control"] == "no-cache"
+
+
+def test_unchanged_static_file_returns_304(client):
+    etag = client.get("/teacher.js").headers["etag"]
+    r = client.get("/teacher.js", headers={"If-None-Match": etag})
+    assert r.status_code == 304  # 沒有變更時只回 304，不會重新下載
+
+
+def test_api_responses_unaffected(client):
+    assert "cache-control" not in client.get("/api/auth/session").headers
