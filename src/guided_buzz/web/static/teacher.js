@@ -10,6 +10,7 @@ const WORKSHEET_STATUS = { pending: "待確認", confirmed: "已確認", cancell
 let socket = null;
 let current = null; // 「目前活動」區塊顯示的活動（002 的老師檢視資料，含 worksheet_id）
 let worksheets = []; // GET /api/worksheets
+let activities = []; // GET /api/activities
 let preview = null; // 剛匯入、等待確認的學習單
 let pendingInvalidate = null;
 
@@ -140,15 +141,29 @@ async function loadWorksheets() {
 
 // ---------- 目前活動 ----------
 
+// 在活動清單標出「目前活動」那一列：同一份學習單有多場活動時，才不會認錯要寫回的是哪一場
+function markCurrentRow() {
+  for (const tr of $("activity-rows").children) {
+    const isCurrent = tr.dataset.id === current?.id;
+    tr.classList.toggle("current", isCurrent);
+    tr.querySelector("button").textContent = isCurrent ? "目前檢視中" : "檢視";
+  }
+}
+
 function render(activity) {
   current = activity;
+  markCurrentRow();
   $("no-activity").hidden = Boolean(activity);
   $("activity-detail").hidden = !activity;
   $("phase").textContent = activity ? PHASE[activity.phase] : "";
   if (!activity) return;
   sessionStorage.setItem(ACTIVITY_KEY, activity.id);
   const f = activity.fairness;
-  $("activity-meta").textContent = `活動編號 ${shortId(activity.id)}　公平機制：${f.enabled ? `啟用（領先 ${f.cooldown_lead} 題冷卻 ${f.cooldown_seconds} 秒）` : "停用"}`;
+  const title = worksheets.find((w) => w.id === activity.worksheet_id)?.spreadsheet_title ?? shortId(activity.worksheet_id);
+  const created = activities.find((a) => a.id === activity.id)?.created_at;
+  $("activity-meta").textContent =
+    `學習單：${title}　建立時間：${time(created)}　活動編號 ${shortId(activity.id)}\n` +
+    `公平機制：${f.enabled ? `啟用（領先 ${f.cooldown_lead} 題冷卻 ${f.cooldown_seconds} 秒）` : "停用"}`;
   $("start-btn").disabled = activity.phase !== "preparing";
   $("end-btn").disabled = activity.phase !== "running";
   $("ended-actions").hidden = activity.phase !== "ended"; // 寫回與下載只在結束後出現（FR-015）
@@ -223,18 +238,21 @@ function invalidate(unitKey) {
 async function loadActivities() {
   const res = await api("/api/activities");
   if (!res.ok) return;
-  const list = await res.json();
+  activities = await res.json();
   const titles = Object.fromEntries(worksheets.map((w) => [w.id, w.spreadsheet_title]));
-  $("no-activities").hidden = list.length > 0;
+  $("no-activities").hidden = activities.length > 0;
   $("activity-rows").replaceChildren(
-    ...list.map((a) => {
+    ...activities.map((a) => {
       const tr = row(shortId(a.id), titles[a.worksheet_id] ?? shortId(a.worksheet_id), PHASE[a.phase], time(a.created_at), time(a.ended_at));
+      tr.dataset.id = a.id;
       const td = document.createElement("td");
       td.appendChild(button("檢視", () => view(a.id), true));
       tr.appendChild(td);
       return tr;
     }),
   );
+  if (current) render(current); // 補上目前活動的建立時間，並標出目前那一列
+  else markCurrentRow();
 }
 
 async function view(id) {
