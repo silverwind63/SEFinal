@@ -27,3 +27,5 @@ form.unit { border-top: 1px solid #d9e2ec; padding-top: 8px; margin-top: 8px; }
 form.unit h3 { font-size: 1rem; margin: 4px 0; }
 td div { margin: 2px 0; }
 td button { padding: 2px 8px; margin-left: 4px; font-size: .85rem; }
+#activity-meta { white-space: pre-line; }
+tr.current td { background: #e3f2fd; font-weight: 600; }  /* 活動清單中的目前活動 */
